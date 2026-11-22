@@ -1,0 +1,2017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Test Drive Revision Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:ital,wght@0,400;0,600;0,800;0,900;1,900&family=Overpass+Mono:wght@400;600&family=Gochi+Hand&display=swap">
+<style>
+/* Layout: a motorway-sign header beside a driving licence, an asphalt "road" tab bar where a car drives to each session stop, then one column of notes, reflections and game cards */
+:root{
+  --bg:#E8EEF2; --surface:#FFFFFF; --surface-2:#F2F6F8; --ink:#141A21; --muted:#56636F; --line:#D0D9E0;
+  --green:#0B6B4A; --green-ink:#FFFFFF; --yellow:#FFC629; --yellow-ink:#211900; --blue:#1C5BAA; --blue-ink:#FFFFFF;
+  --red:#D3263A; --orange:#EF7A12;
+  --asphalt:#2A2F36; --asphalt-2:#3A414B; --lane:#FFD33D; --lane-white:#F4F6F8;
+  --sky:#BEE2F4; --hill:#A6D5B9; --hill-2:#86C29F;
+  --good:#11744A; --good-bg:#DCF2E6; --bad:#BF2034; --bad-bg:#FBE3E6;
+  --shadow:rgba(20,26,33,.16);
+  --display:"Overpass","Arial Narrow","Helvetica Neue",Arial,sans-serif;
+  --body:"Overpass",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Overpass Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --hand:"Gochi Hand","Comic Sans MS","Bradley Hand",cursive;
+  --r:12px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0C1218; --surface:#151D26; --surface-2:#1B2530; --ink:#E7EDF2; --muted:#9AA8B5; --line:#2A3744;
+  --green:#0F7D55; --green-ink:#FFFFFF; --yellow:#FFCF4A; --yellow-ink:#211900; --blue:#5B98E6; --blue-ink:#0C1218;
+  --red:#FF5E6E; --orange:#FF9A3D;
+  --asphalt:#171B21; --asphalt-2:#272D35; --lane:#E9B92B; --lane-white:#C9D2DA;
+  --sky:#0F2135; --hill:#173B2C; --hill-2:#112F22;
+  --good:#5ED69A; --good-bg:#10301F; --bad:#FF8592; --bad-bg:#3A161B;
+  --shadow:rgba(0,0,0,.55); color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0C1218; --surface:#151D26; --surface-2:#1B2530; --ink:#E7EDF2; --muted:#9AA8B5; --line:#2A3744;
+  --green:#0F7D55; --green-ink:#FFFFFF; --yellow:#FFCF4A; --yellow-ink:#211900; --blue:#5B98E6; --blue-ink:#0C1218;
+  --red:#FF5E6E; --orange:#FF9A3D;
+  --asphalt:#171B21; --asphalt-2:#272D35; --lane:#E9B92B; --lane-white:#C9D2DA;
+  --sky:#0F2135; --hill:#173B2C; --hill-2:#112F22;
+  --good:#5ED69A; --good-bg:#10301F; --bad:#FF8592; --bad-bg:#3A161B;
+  --shadow:rgba(0,0,0,.55); color-scheme:dark;
+}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16.5px;line-height:1.55;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:20;background:var(--asphalt)}
+img{max-width:100%}
+.wrap{max-width:1040px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.02}
+p{margin:0}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:6px}
+.eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- Header: sky, hills, the motorway sign and the licence ---------- */
+.top{position:relative;overflow:hidden;background:linear-gradient(180deg,var(--sky) 0%,var(--bg) 100%)}
+.top::before,.top::after{content:"";position:absolute;bottom:-120px;border-radius:50%;pointer-events:none}
+.top::before{left:-8%;width:70%;height:220px;background:var(--hill)}
+.top::after{right:-12%;width:75%;height:250px;background:var(--hill-2)}
+.top .wrap{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:28px;align-items:end;padding-block:30px 26px}
+.signpost{display:grid;justify-items:start;min-width:0}
+.sign{background:var(--green);color:var(--green-ink);border-radius:16px;padding:22px 26px 20px;
+  box-shadow:inset 0 0 0 5px var(--green),inset 0 0 0 8px var(--green-ink),0 10px 0 -2px var(--shadow);max-width:560px;width:100%;
+  transform:rotate(-1.2deg);transform-origin:bottom left}
+.sign .route-no{display:inline-flex;gap:8px;align-items:center;font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase}
+.sign .route-no b{background:var(--yellow);color:var(--yellow-ink);padding:2px 8px;border-radius:4px;font-weight:600}
+.sign h1{font-weight:900;text-transform:uppercase;letter-spacing:-.01em;margin-top:8px;font-size:clamp(2.6rem,7.4vw,4.6rem)}
+.sign h1 span{display:block}
+.sign h1 .lab{font-style:italic;color:var(--yellow);font-size:.62em;letter-spacing:.01em}
+.exits{list-style:none;margin:14px 0 0;padding:12px 0 0;border-top:2px solid rgba(255,255,255,.35);display:grid;gap:6px}
+.exits li{display:flex;justify-content:space-between;gap:14px;font-weight:600;font-size:.96rem}
+.exits li span:last-child{font-family:var(--mono);font-weight:400;white-space:nowrap}
+.posts{display:flex;gap:120px;margin-left:60px}
+.posts i{display:block;width:12px;height:34px;background:linear-gradient(90deg,#8E979F,#C7CED4 50%,#8E979F)}
+
+.licence{background:var(--surface);border-radius:14px;box-shadow:0 2px 0 var(--line),0 18px 30px -18px var(--shadow);
+  border:1px solid var(--line);overflow:hidden;max-width:400px;width:100%;justify-self:end;transform:rotate(1.5deg)}
+.lic-top{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--blue);color:var(--blue-ink);padding:8px 14px;font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase}
+.lic-top b{font-family:var(--display);font-weight:900;font-size:.95rem;letter-spacing:.04em}
+.lic-body{display:grid;grid-template-columns:86px minmax(0,1fr);gap:14px;padding:14px}
+.photo{width:86px;height:104px;border-radius:8px;background:var(--surface-2);border:1px solid var(--line);display:grid;place-items:center;position:relative}
+.photo svg{width:62px}
+.lplate{position:absolute;right:-6px;bottom:-6px;width:28px;height:28px;background:#fff;border:2px solid var(--red);border-radius:4px;display:grid;place-items:center;
+  font-family:var(--display);font-weight:900;color:var(--red);font-size:1.05rem;line-height:1}
+.fields{display:grid;gap:7px;min-width:0}
+.field{display:grid;gap:1px}
+.field small{font-family:var(--mono);font-size:.64rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.field b{font-family:var(--display);font-weight:800;font-size:1.05rem;line-height:1.1}
+.odo{display:flex;gap:2px;align-items:center}
+.odo i{font-style:normal;font-family:var(--mono);font-weight:600;font-size:1.15rem;width:1.15em;text-align:center;background:#0B0E12;box-shadow:inset 0 0 0 1px var(--line);color:#F4F6F8;border-radius:3px;padding:1px 0;font-variant-numeric:tabular-nums}
+.odo em{font-style:normal;font-family:var(--mono);font-size:.8rem;color:var(--muted);margin-left:6px}
+.odo.bump i{animation:bump .5s}
+@keyframes bump{40%{transform:translateY(-3px)}}
+.stamps{display:flex;flex-wrap:wrap;gap:6px;padding:0 14px 14px}
+.stamp{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:900;font-size:.78rem;
+  border:2px dashed var(--line);color:var(--muted)}
+.stamp.on{border:3px double var(--red);color:var(--red);transform:rotate(-12deg);background:color-mix(in srgb,var(--red) 8%,transparent)}
+.stamp.on.g{border-color:var(--green);color:var(--green);transform:rotate(9deg);background:color-mix(in srgb,var(--green) 8%,transparent)}
+.stamp.pop{animation:stampin .45s cubic-bezier(.2,1.6,.4,1)}
+@keyframes stampin{0%{transform:scale(2.2) rotate(-30deg);opacity:0}100%{opacity:1}}
+
+/* ---------- The road (tab bar) ---------- */
+.road{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--asphalt);box-shadow:0 6px 14px -8px var(--shadow)}
+.road::after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:6px;background:repeating-linear-gradient(90deg,var(--lane-white) 0 14px,var(--asphalt-2) 14px 28px)}
+.road-scroll{overflow-x:auto;scrollbar-width:none}
+.road-scroll::-webkit-scrollbar{display:none}
+.route{position:relative;display:inline-block;min-width:100%;padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px))}
+.stops{display:flex;gap:2px;justify-content:center;padding-top:8px}
+.stop{flex:0 0 auto;display:grid;justify-items:center;gap:4px;border:0;background:transparent;cursor:pointer;padding:4px 8px 2px;border-radius:10px;color:#C9D2DA;min-width:76px}
+.stop:hover{background:var(--asphalt-2)}
+.stop .lbl{font-size:.74rem;font-weight:600;white-space:nowrap;letter-spacing:.01em}
+.stop[aria-selected="true"] .lbl{color:var(--lane)}
+.tok{width:36px;height:36px;display:grid;place-items:center;font-family:var(--display);font-weight:900;font-size:.82rem;line-height:1;transition:transform .2s}
+.stop:hover .tok,.stop[aria-selected="true"] .tok{transform:scale(1.12)}
+.tok.lec{border-radius:50%;background:var(--blue);color:var(--blue-ink);box-shadow:inset 0 0 0 2px #fff}
+.tok.guest{position:relative;color:var(--yellow-ink)}
+.tok.guest::before{content:"";position:absolute;inset:5px;background:var(--yellow);transform:rotate(45deg);border-radius:3px;box-shadow:inset 0 0 0 2px var(--yellow-ink)}
+.tok.guest span{position:relative}
+.tok.start{border-radius:6px;background:var(--green);color:#fff;box-shadow:inset 0 0 0 2px #fff;width:44px}
+.tok.work{position:relative;color:#fff}
+.tok.work::before{content:"";position:absolute;inset:0;background:var(--orange);clip-path:polygon(50% 4%,98% 94%,2% 94%)}
+.tok.work span{position:relative;font-size:.62rem;margin-top:10px}
+.tok.info{border-radius:6px;background:var(--blue);color:var(--blue-ink);font-family:serif;font-style:italic;font-size:1.2rem;box-shadow:inset 0 0 0 2px #fff}
+.lane{position:relative;height:30px}
+.lane::before{content:"";position:absolute;left:0;right:0;top:50%;height:3px;margin-top:-1px;background:repeating-linear-gradient(90deg,var(--lane) 0 18px,transparent 18px 34px)}
+.car{position:absolute;left:0;top:1px;width:54px;height:28px;transition:transform .7s cubic-bezier(.45,.05,.3,1);will-change:transform}
+.car svg{display:block;width:54px;height:28px;transition:transform .25s}
+.car.flip svg{transform:scaleX(-1)}
+.car.drive .wheel{animation:spin .35s linear infinite}
+.wheel{transform-box:fill-box;transform-origin:center}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ---------- Panels ---------- */
+main .wrap{padding-block:40px 72px}
+.panel{display:grid;gap:30px}
+.panel.enter{animation:enter .35s ease-out}
+@keyframes enter{from{opacity:.35;transform:translateY(8px)}}
+.intro{display:grid;gap:14px;max-width:70ch}
+.intro h2{font-size:clamp(2rem,5vw,3.1rem);font-weight:900;letter-spacing:-.015em}
+.intro p{color:var(--muted)}
+.intro p strong{color:var(--ink)}
+.takeaway{position:relative;background:var(--yellow);color:var(--yellow-ink) !important;font-weight:600;border-radius:10px;padding:14px 16px 14px 58px;box-shadow:inset 0 0 0 2px var(--yellow-ink)}
+.takeaway::before{content:"";position:absolute;left:16px;top:50%;width:24px;height:24px;margin-top:-12px;background:var(--yellow-ink);transform:rotate(45deg);border-radius:4px}
+.takeaway::after{content:"!";position:absolute;left:14px;top:50%;width:28px;height:28px;margin-top:-14px;display:grid;place-items:center;font-family:var(--display);font-weight:900;color:var(--yellow);font-size:1rem}
+.note{background:var(--surface);border:2px solid var(--blue);border-radius:10px;padding:12px 14px;color:var(--ink) !important}
+
+h2.sec{display:inline-block;font-size:1.25rem;font-weight:900;text-transform:uppercase;letter-spacing:.02em;background:var(--green);color:var(--green-ink);
+  padding:8px 16px 6px;border-radius:8px;box-shadow:inset 0 0 0 3px var(--green),inset 0 0 0 5px var(--green-ink)}
+.sec-head{scroll-margin-top:calc(110px + env(safe-area-inset-top,0px));display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:space-between;align-items:center}
+.sec-head.refl h2.sec{background:var(--blue);color:var(--blue-ink);box-shadow:inset 0 0 0 3px var(--blue),inset 0 0 0 5px var(--blue-ink)}
+.g-best{font-family:var(--mono);font-size:.78rem;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.g-best b{color:var(--ink);font-weight:600}
+
+/* Notes */
+.notes{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
+.nc{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:grid;gap:10px;align-content:start;min-width:0}
+.nc.wide{grid-column:1/-1}
+.nc h3{font-size:1.08rem;font-weight:800;text-transform:uppercase;letter-spacing:.02em}
+.nc p,.nc li,.nc dd{font-size:.94rem;color:var(--muted)}
+.nc p strong,.nc li strong{color:var(--ink);font-weight:600}
+.nc ul{margin:0;padding-left:1.1em;display:grid;gap:5px}
+.src{font-family:var(--mono);font-size:.72rem;color:var(--muted)}
+.stats{display:grid;gap:8px;margin:0}
+.stats div{display:grid;grid-template-columns:6.4em minmax(0,1fr);gap:12px;align-items:baseline}
+.stats dt{font-family:var(--display);font-weight:900;color:var(--ink);font-size:1.12rem;font-variant-numeric:tabular-nums;text-align:right;line-height:1.1}
+.stats dd{margin:0}
+.deflist{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:0 22px;margin:0}
+.deflist div{display:grid;gap:2px;padding:9px 0;border-top:1px dashed var(--line)}
+.deflist dt{font-weight:800;font-size:.96rem}
+.deflist dd{margin:0}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:.9rem}
+.flow span{background:var(--surface-2);border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:4px 11px;font-weight:600}
+.flow i{font-style:normal;color:var(--green);font-weight:900}
+.bad-prompt{font-family:var(--mono);font-size:.84rem;background:var(--bad-bg);color:var(--bad) !important;border-radius:6px;padding:6px 10px}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+.tbl table{border-collapse:collapse;width:100%;min-width:560px;font-size:.9rem}
+.tbl th,.tbl td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--line)}
+.tbl th{font-family:var(--mono);font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--surface-2)}
+.tbl .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tbl tfoot td{font-weight:800;border-bottom:0}
+
+/* Reflection: notes pinned to the examiner's clipboard */
+.reflect{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;padding-top:6px}
+.rf{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px 18px 18px;display:grid;gap:8px;align-content:start;box-shadow:0 8px 16px -12px var(--shadow)}
+.rf:nth-child(1){transform:rotate(-.8deg)} .rf:nth-child(2){transform:rotate(.6deg)} .rf:nth-child(3){transform:rotate(-.4deg)}
+.rf::before{content:"";position:absolute;top:-9px;left:50%;width:74px;height:18px;margin-left:-37px;background:color-mix(in srgb,var(--yellow) 70%,transparent);transform:rotate(-3deg);border-radius:2px}
+.rf-k{font-family:var(--hand);font-size:1.45rem;line-height:1;color:var(--blue)}
+.rf p{font-size:.96rem}
+
+/* ---------- Game cards ---------- */
+.game{background:var(--surface);border:2px solid var(--ink);border-radius:16px;display:grid;box-shadow:6px 6px 0 var(--ink);overflow:hidden}
+.g-head{display:flex;flex-wrap:wrap;gap:10px 16px;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:2px solid var(--ink);background:var(--surface-2)}
+.g-title{display:flex;gap:14px;align-items:center;min-width:0}
+.g-title > div{display:grid;gap:3px;min-width:0}
+.g-icon{flex:0 0 auto;width:44px;height:44px}
+.g-head h3{font-size:1.4rem;font-weight:900;text-transform:uppercase;letter-spacing:-.005em}
+.g-head p{color:var(--muted);font-size:.92rem;max-width:62ch}
+.g-body{padding:20px 20px 24px;display:grid;gap:16px;min-width:0}
+.g-status{display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:.78rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.g-bar{position:relative;height:10px;background:var(--asphalt);border-radius:5px;overflow:visible}
+.g-bar::before{content:"";position:absolute;left:4px;right:4px;top:4px;height:2px;background:repeating-linear-gradient(90deg,var(--lane) 0 8px,transparent 8px 16px);opacity:.7}
+.g-bar i{position:absolute;left:0;top:-5px;width:20px;height:20px;border-radius:50%;background:var(--red);border:3px solid var(--surface);transition:left .35s;box-shadow:0 1px 3px var(--shadow)}
+.g-q{font-size:1.18rem;font-weight:600;line-height:1.42;max-width:62ch}
+.g-q small{display:block;font-weight:400;color:var(--muted);font-size:.88rem;margin-top:4px}
+.g-opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.g-opts.few{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.opt{text-align:left;border:2px solid var(--ink);background:var(--surface);border-radius:10px;padding:11px 13px;cursor:pointer;font-weight:600;font-size:.95rem;line-height:1.28;
+  box-shadow:0 4px 0 var(--ink);transition:transform .08s,box-shadow .08s,background .15s}
+.opt:hover:not(:disabled){background:var(--surface-2);transform:translateY(-1px);box-shadow:0 5px 0 var(--ink)}
+.opt:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.opt:disabled{cursor:default;opacity:.45}
+.opt.is-right{opacity:1;border-color:var(--good);background:var(--good-bg);color:var(--good);box-shadow:0 4px 0 var(--good)}
+.opt.is-wrong{opacity:1;border-color:var(--bad);background:var(--bad-bg);color:var(--bad);box-shadow:0 4px 0 var(--bad);animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-5px)}50%{transform:translateX(4px)}75%{transform:translateX(-2px)}}
+.g-fb{display:grid;gap:12px;border-radius:12px;padding:14px 16px;background:var(--surface-2);border:1px dashed var(--line);font-size:.96rem}
+.exam{font-family:var(--hand);font-size:1.5rem;line-height:1;margin-right:6px}
+.exam.ok{color:var(--good)} .exam.no{color:var(--bad)}
+.g-actions{display:flex;flex-wrap:wrap;gap:10px}
+.btn{border:2px solid var(--ink);border-radius:10px;padding:10px 18px;font-weight:800;cursor:pointer;background:var(--green);color:var(--green-ink);box-shadow:0 4px 0 var(--ink);transition:transform .08s,box-shadow .08s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 5px 0 var(--ink)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.btn.ghost{background:var(--surface);color:var(--ink)}
+.end{display:grid;gap:12px;justify-items:start;position:relative}
+.end .big{font-family:var(--display);font-size:2.8rem;font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
+.end p{color:var(--muted)}
+.verdict{position:absolute;right:6px;top:4px;font-family:var(--display);font-weight:900;font-size:1.7rem;letter-spacing:.08em;padding:6px 14px 2px;border:4px double currentColor;border-radius:10px;transform:rotate(-10deg)}
+.verdict.pass{color:var(--good)} .verdict.retake{color:var(--bad)}
+.verdict.pop{animation:stampin .5s cubic-bezier(.2,1.6,.4,1)}
+
+/* Higher or lower */
+.hl{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:stretch}
+.hl .vs{align-self:center;font-family:var(--display);font-weight:900;font-size:1.05rem;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--yellow);color:var(--yellow-ink);border:2px solid var(--ink)}
+.hl .opt{display:grid;gap:6px;padding:16px;min-height:104px;align-content:center}
+.hl .opt .name{font-family:var(--display);font-size:1.25rem;font-weight:900;line-height:1.1}
+.hl .opt .val{font-family:var(--mono);font-size:1.15rem;font-weight:600;font-variant-numeric:tabular-nums}
+
+/* Order */
+.order{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.order li{display:grid;grid-template-columns:2.4em minmax(0,1fr) auto;gap:10px;align-items:center;border:2px solid var(--line);border-radius:10px;padding:8px 8px 8px 10px;background:var(--surface)}
+.order li .n{font-family:var(--display);font-weight:900;font-size:1rem;color:var(--blue);font-variant-numeric:tabular-nums}
+.order li .t{min-width:0;font-weight:600;font-size:.95rem}
+.order li .mv{display:flex;gap:4px}
+.mv button{width:36px;height:36px;border:2px solid var(--ink);background:var(--surface);border-radius:8px;cursor:pointer;color:var(--ink);box-shadow:0 2px 0 var(--ink);font-size:.8rem}
+.mv button:disabled{opacity:.25;cursor:default;box-shadow:none}
+.order li.is-right{border-color:var(--good);background:var(--good-bg)}
+.order li.is-wrong{border-color:var(--bad);background:var(--bad-bg)}
+.order li .fix{font-family:var(--mono);font-size:.75rem;color:var(--bad);white-space:nowrap}
+.order li.is-right .fix{color:var(--good)}
+
+/* Builder */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:2px solid var(--ink);background:var(--surface);border-radius:999px;padding:7px 14px;cursor:pointer;font-weight:700;font-size:.9rem;box-shadow:0 3px 0 var(--ink)}
+.chip[aria-pressed="true"]{background:var(--blue);color:var(--blue-ink)}
+.chip:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+.out-wrap{display:grid;gap:6px}
+.prompt-out{margin:0;font-family:var(--mono);font-size:.84rem;line-height:1.65;white-space:pre-wrap;word-break:break-word;background:var(--asphalt);color:#EEF2F5;border-radius:10px;padding:14px 16px;min-height:6em;border-left:6px solid var(--lane)}
+.missing{margin:0;padding-left:1.2em;color:var(--muted);font-size:.92rem;display:grid;gap:4px}
+
+/* ---------- Home ---------- */
+.objectives{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
+.objectives li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;font-size:.93rem;color:var(--muted)}
+.objectives li b{font-family:var(--display);font-weight:900;color:#fff;background:var(--blue);width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:.85rem}
+.objectives li strong{display:block;color:var(--ink)}
+.grading{display:grid;grid-template-columns:3fr 2fr 5fr;border-radius:var(--r);overflow:hidden;border:2px solid var(--ink)}
+.grading div{padding:14px;display:grid;gap:2px;background:var(--surface);border-right:2px solid var(--ink);min-width:0}
+.grading div:last-child{border-right:0;background:var(--yellow);color:var(--yellow-ink)}
+.grading b{font-family:var(--display);font-size:1.8rem;font-weight:900;font-variant-numeric:tabular-nums;line-height:1}
+.grading span{font-size:.86rem}
+.grading div:not(:last-child) span{color:var(--muted)}
+.journey{list-style:none;margin:0;padding:0 0 0 26px;position:relative;display:grid;gap:4px}
+.journey::before{content:"";position:absolute;left:9px;top:10px;bottom:10px;width:4px;background:repeating-linear-gradient(180deg,var(--asphalt) 0 12px,transparent 12px 18px);border-radius:2px}
+.journey li{position:relative}
+.journey li::before{content:"";position:absolute;left:-23px;top:15px;width:14px;height:14px;border-radius:50%;background:var(--surface);border:3px solid var(--blue)}
+.journey li.g::before{border-color:var(--yellow-ink);background:var(--yellow);border-radius:3px;transform:rotate(45deg)}
+.journey li.f::before{border-color:var(--muted);border-style:dashed}
+.journey button{all:unset;cursor:pointer;display:grid;grid-template-columns:7.2em minmax(0,1fr);gap:12px;align-items:baseline;padding:8px 10px;border-radius:8px;width:100%;box-sizing:border-box}
+.journey button:hover{background:var(--surface)}
+.journey button:focus-visible{outline:3px solid var(--blue)}
+.journey .d{font-family:var(--mono);font-size:.78rem;color:var(--muted)}
+.journey .w{font-weight:600}
+.journey .w small{display:block;font-weight:400;color:var(--muted);font-size:.86rem}
+.howto{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.howto div{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:grid;gap:8px;align-content:start}
+.howto svg{width:44px;height:44px}
+.howto h3{font-size:1.2rem;font-weight:900;text-transform:uppercase}
+.howto p{color:var(--muted);font-size:.92rem}
+.howto .pts{font-family:var(--mono);font-size:.74rem;color:var(--ink)}
+.scale{display:grid;grid-template-columns:repeat(4,1fr);border:2px solid var(--ink);border-radius:var(--r);overflow:hidden;background:var(--surface)}
+.scale div{padding:12px 14px;display:grid;gap:2px;border-right:2px solid var(--ink)}
+.scale div:last-child{border-right:0}
+.scale b{font-family:var(--display);font-weight:900;font-size:1.05rem;text-transform:uppercase}
+.scale span{font-family:var(--mono);font-size:.74rem;color:var(--muted)}
+.scale div.on{background:var(--green);color:var(--green-ink)}
+.scale div.on span{color:var(--green-ink)}
+
+/* Road ahead + build */
+.ahead{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
+.stop-card{border:2px dashed var(--line);border-radius:var(--r);padding:16px;display:grid;gap:8px;align-content:start;background:var(--surface)}
+.stop-card .eyebrow{display:flex;justify-content:space-between;gap:8px}
+.stop-card .cone{color:var(--orange);font-weight:600}
+.stop-card h3{font-size:1.2rem;font-weight:900;text-transform:uppercase}
+.stop-card p{font-size:.92rem;color:var(--muted)}
+.stop-card .plan{font-size:.9rem;color:var(--ink);border-top:1px dashed var(--line);padding-top:8px}
+.stop-card .plan b{font-family:var(--mono);font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:block}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;counter-reset:s}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:grid;gap:8px;align-content:start}
+.step h3{font-size:1.2rem;font-weight:900;text-transform:uppercase}
+.step h3::before{counter-increment:s;content:counter(s) " ";color:var(--green)}
+.step p{color:var(--muted);font-size:.92rem}
+.sources{margin:0;padding-left:1.2em;color:var(--muted);font-size:.9rem;display:grid;gap:4px}
+footer{background:var(--asphalt);color:#AEB8C2;font-size:.82rem}
+footer .wrap{padding-block:22px}
+
+@media (max-width:820px){
+  .top .wrap{grid-template-columns:1fr;gap:22px}
+  .licence{justify-self:start;transform:rotate(.8deg)}
+  .posts{display:none}
+}
+@media (max-width:560px){
+  .hl{grid-template-columns:1fr}
+  .hl .vs{justify-self:center}
+  .scale{grid-template-columns:1fr 1fr}
+  .scale div:nth-child(2){border-right:0}
+  .scale div:nth-child(-n+2){border-bottom:2px solid var(--ink)}
+  .grading{grid-template-columns:1fr}
+  .grading div{border-right:0;border-bottom:2px solid var(--ink)}
+  .grading div:last-child{border-bottom:0}
+  .g-head,.g-body{padding-left:14px;padding-right:14px}
+  .game{box-shadow:4px 4px 0 var(--ink)}
+  .stop{min-width:64px;padding-inline:4px}
+  .verdict{position:static;transform:rotate(-6deg)}
+  .sign{padding:18px 18px 16px}
+  .stamps{gap:5px}
+  .stamp{width:34px;height:34px;font-size:.72rem}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none !important;transition:none !important;scroll-behavior:auto !important}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-sort" viewBox="0 0 44 44"><circle cx="22" cy="22" r="20" fill="var(--blue)"/><circle cx="22" cy="22" r="17.5" fill="none" stroke="#fff" stroke-width="2"/><path d="M12 17h17m-5-5 5 5-5 5M32 27H15m5-5-5 5 5 5" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-hl" viewBox="0 0 44 44"><path d="M22 3 42 39H2Z" fill="#fff" stroke="var(--red)" stroke-width="4" stroke-linejoin="round"/><path d="M16 30V18m-4 4 4-4 4 4M28 18v12m-4-4 4 4 4-4" fill="none" stroke="#141A21" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-order" viewBox="0 0 44 44"><rect x="2" y="7" width="40" height="30" rx="5" fill="var(--green)"/><rect x="4.5" y="9.5" width="35" height="25" rx="3.5" fill="none" stroke="#fff" stroke-width="1.6"/><text x="22" y="27.5" text-anchor="middle" font-family="Overpass,Arial,sans-serif" font-weight="900" font-size="13" fill="#fff">1·2·3</text></symbol>
+  <symbol id="i-build" viewBox="0 0 44 44"><rect x="8" y="8" width="28" height="28" rx="3" transform="rotate(45 22 22)" fill="var(--yellow)" stroke="#211900" stroke-width="2.4"/><path d="M22 14v16M14 22h16" stroke="#211900" stroke-width="3.4" stroke-linecap="round"/></symbol>
+  <symbol id="i-car" viewBox="0 0 54 28"><path d="M5 19c0-4 2-6 6-7l7-6c1.5-1.2 3-1.6 5-1.6h10c2.4 0 4.2.8 5.8 2.4L44 12c5 .6 7 2.6 7 6v2.5c0 1-.8 1.8-1.8 1.8H6.8C5.8 22.3 5 21.5 5 20.5Z" fill="var(--red)"/><path d="M19.5 11.5 24 7.4c.6-.5 1.3-.8 2.1-.8H31v4.9Zm13.5 0V6.6h1.4c1.2 0 2.3.5 3.2 1.3l3.7 3.6Z" fill="#CFE8F7"/><rect x="45.5" y="14" width="4" height="2.6" rx="1" fill="#FFE27A"/><rect x="7" y="15.5" width="7" height="5.5" rx="1" fill="#fff" stroke="var(--red)" stroke-width=".8"/><text x="10.5" y="20.3" text-anchor="middle" font-family="Overpass,Arial,sans-serif" font-weight="900" font-size="5.6" fill="var(--red)">L</text><g class="wheel"><circle cx="15" cy="22" r="4.6" fill="#1A1E23"/><circle cx="15" cy="22" r="1.8" fill="#C9D2DA"/><rect x="14.4" y="17.6" width="1.2" height="2.4" fill="#C9D2DA"/></g><g class="wheel"><circle cx="41" cy="22" r="4.6" fill="#1A1E23"/><circle cx="41" cy="22" r="1.8" fill="#C9D2DA"/><rect x="40.4" y="17.6" width="1.2" height="2.4" fill="#C9D2DA"/></g></symbol>
+</svg>
+
+<header class="top">
+  <div class="wrap">
+    <div class="signpost">
+      <div class="sign">
+        <span class="route-no"><b>MMD</b> ESSEC Business School · Oct–Dec 2026</span>
+        <h1><span>Test Drive</span><span class="lab">Revision Lab</span></h1>
+        <ul class="exits">
+          <li><span>Sessions so far</span><span>5 + 3 guests</span></li>
+          <li><span>Next exit: China vs global platforms</span><span>S6 →</span></li>
+          <li><span>Final pitches</span><span>11 &amp; 16 Dec</span></li>
+        </ul>
+      </div>
+      <div class="posts" aria-hidden="true"><i></i><i></i></div>
+    </div>
+    <div class="licence" id="licence" aria-live="polite">
+      <div class="lic-top"><b>Licence</b><span>Digital Platforms</span></div>
+      <div class="lic-body">
+        <div class="photo" aria-hidden="true"><svg viewBox="0 0 54 28"><use href="#i-car"/></svg><span class="lplate" id="plate">L</span></div>
+        <div class="fields">
+          <div class="field"><small>1 · Holder</small><b>You, learner driver</b></div>
+          <div class="field"><small>2 · Points</small><div class="odo" id="odo" aria-hidden="true"></div></div>
+          <div class="field"><small>3 · Category</small><b id="level">L-plate</b></div>
+        </div>
+      </div>
+      <div class="stamps" id="stamps" aria-label="Session stamps"></div>
+      <span class="sr" id="licText"></span>
+    </div>
+  </div>
+</header>
+
+<nav class="road" aria-label="Sessions">
+  <div class="road-scroll" id="roadScroll">
+    <div class="route">
+      <div class="stops" role="tablist" id="tabs"></div>
+      <div class="lane" aria-hidden="true"><div class="car" id="car"><svg viewBox="0 0 54 28"><use href="#i-car"/></svg></div></div>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <div class="wrap">
+
+    <!-- START -->
+    <section class="panel" id="p-start" role="tabpanel" aria-labelledby="t-start">
+      <div class="intro">
+        <p class="eyebrow">About the course</p>
+        <h2>Digital Platforms Test Drive</h2>
+        <p>A hands-on course in ESSEC's MSc in Marketing Management &amp; Digital, taught by <strong>Madina Kalyayeva</strong>. It covers ad buying, audience targeting, influencer selection, content trends, analytics, and AI for content production and project management.</p>
+        <p>Sessions are co-led by the platforms themselves and by agencies and partners, who show the tools marketers use to get a campaign seen in a crowded feed. Platforms change fast, so the course is a foundation for keeping up rather than a fixed manual.</p>
+      </div>
+
+      <div class="sec-head"><h2 class="sec">The route so far</h2></div>
+      <ol class="journey" id="journey">
+        <li><button data-go="s1"><span class="d">3 Oct</span><span class="w">Session 1 · The platform landscape<small>Ten platform types, usage numbers, metric families</small></span></button></li>
+        <li><button data-go="s2"><span class="d">9 Oct</span><span class="w">Session 2 · Tools and paid media<small>The martech stack, platform ad tools, organic vs paid</small></span></button></li>
+        <li class="g"><button data-go="launchlab"><span class="d">9 Oct</span><span class="w">Guest · LaunchLab<small>Design, build and deploy a website with AI</small></span></button></li>
+        <li><button data-go="s3"><span class="d">23 Oct</span><span class="w">Session 3 · Media buying and objectives<small>Why agencies, Meta's six objectives, the final project</small></span></button></li>
+        <li><button data-go="s4"><span class="d">30 Oct</span><span class="w">Session 4 · Managing campaigns<small>The media team, the brief, the WWF case</small></span></button></li>
+        <li class="g"><button data-go="yp"><span class="d">30 Oct</span><span class="w">Guest · Yellow Pages Singapore<small>Building an AI marketing team</small></span></button></li>
+        <li><button data-go="s5"><span class="d">13 Nov</span><span class="w">Session 5 · Audiences and investment<small>Insight vs size, AI research, customer quality</small></span></button></li>
+        <li class="g"><button data-go="li"><span class="d">13 Nov</span><span class="w">Guest · LinkedIn<small>From SEO to GEO in the era of LLMs</small></span></button></li>
+        <li class="f"><button data-go="next"><span class="d">Nov–Dec</span><span class="w">Sessions 6–10 · The road ahead<small>China platforms, measurement, Google, Pinterest, final pitches</small></span></button></li>
+      </ol>
+
+      <div class="intro">
+        <h2 class="sec">By the end of the course</h2>
+      </div>
+      <ol class="objectives">
+        <li><b>1</b><span><strong>Platform-specific skills</strong>Use each platform's own tools, from AI content production to targeting and engagement metrics.</span></li>
+        <li><b>2</b><span><strong>Segment and target</strong>Reach and engage different audiences across platforms.</span></li>
+        <li><b>3</b><span><strong>Optimise campaigns</strong>Test, tweak and improve campaigns on performance data.</span></li>
+        <li><b>4</b><span><strong>Analytics for insight</strong>Measure and refine strategy with each platform's analytics to lift ROI.</span></li>
+        <li><b>5</b><span><strong>Integrated strategy</strong>Design campaigns that work across several platforms at once.</span></li>
+      </ol>
+
+      <div class="intro">
+        <h2 class="sec">How it's assessed</h2>
+        <p>The final project is an omni-channel campaign for a brand's hypothetical new product, across at least two platforms, with one AI component, a $100,000 simulated budget and KPIs per funnel stage. The Session 3 tab has the full checklist.</p>
+      </div>
+      <div class="grading">
+        <div><b>30%</b><span>Platform case presentations and reflections on Moodle</span></div>
+        <div><b>20%</b><span>Class participation</span></div>
+        <div><b>50%</b><span>Final project: a multi-platform campaign pitch</span></div>
+      </div>
+
+      <div class="intro">
+        <p class="eyebrow">How to play</p>
+        <h2>Drive to a stop, read, then play</h2>
+        <p>Tap any stop on the road above and the car drives there. Blue circles are lectures, yellow diamonds are guest sessions. Each tab opens with notes from that session, then a short reflection, then games built from its slides.</p>
+      </div>
+      <div class="howto">
+        <div><svg aria-hidden="true"><use href="#i-sort"/></svg><h3>Sort it</h3><p>A card appears. Pick where it belongs. You see the answer and a one-line reason straight away.</p><span class="pts">10 points per correct card</span></div>
+        <div><svg aria-hidden="true"><use href="#i-hl"/></svg><h3>Higher or lower</h3><p>Two options, one statistic from the slides. Tap the higher one, then see both values and the source.</p><span class="pts">10 points per correct round</span></div>
+        <div><svg aria-hidden="true"><use href="#i-order"/></svg><h3>Put it in order</h3><p>Move steps up and down with the arrows, then check. One check per shuffle, so think first.</p><span class="pts">10 points per step in place</span></div>
+        <div><svg aria-hidden="true"><use href="#i-build"/></svg><h3>Build it</h3><p>Switch on the right ingredients and watch the result take shape. Some chips are traps.</p><span class="pts">10 per ingredient, minus 5 per trap</span></div>
+      </div>
+
+      <div class="intro">
+        <h2 class="sec">Your licence</h2>
+        <p>Only your best run in each game counts. Score 60% or more across a session's games to earn its stamp. Your category is your share of every point on offer. Scores stay in this browser, and you can reset them from Build notes.</p>
+      </div>
+      <div class="scale" id="scale">
+        <div data-min="0"><b>L-plate</b><span>0–24%</span></div>
+        <div data-min="25"><b>Provisional</b><span>25–59%</span></div>
+        <div data-min="60"><b>Full licence</b><span>60–89%</span></div>
+        <div data-min="90"><b>Advanced</b><span>90%+</span></div>
+      </div>
+    </section>
+
+    <section class="panel" id="p-s1" role="tabpanel" aria-labelledby="t-s1" hidden>
+      <div class="intro">
+        <p class="eyebrow">Session 1 · 3 Oct 2026 · Lecture</p>
+        <h2>Ten platform types and the numbers behind them</h2>
+        <p>The opening session mapped the ten types of digital marketing platform, each with a Southeast Asian example, and read the DataReportal and GWI figures on how people actually use social media. It closed on campaigns, channel management, data collection and the eight families of benchmarking metrics.</p>
+        <p class="takeaway">Brands used to choose audiences by age, location and interests. Now Meta Advantage+, Google Performance Max and TikTok Smart+ find the audience, so the creative does the targeting.</p>
+        <div class="g-actions"><button class="btn ghost" data-jump="games-s1">Skip to the games</button></div>
+      </div>
+
+      <div class="sec-head"><h2 class="sec">Session notes</h2></div>
+      <div class="notes">
+        <div class="nc">
+          <h3>Singapore in numbers</h3>
+          <dl class="stats">
+            <div><dt>5.33M</dt><dd>social media users, 90.6% of the population</dd></div>
+            <div><dt>95.3%</dt><dd>of adults use social media</dd></div>
+            <div><dt>17 hrs</dt><dd>a week on social, across 7.4 platforms a month</dd></div>
+            <div><dt>1 in 3</dt><dd>use ChatGPT every month; it sends 75%+ of AI referrals</dd></div>
+            <div><dt>71.1%</dt><dd>of online adults worry about what's real or fake</dd></div>
+          </dl>
+          <p class="src">Source: DataReportal, Digital 2026</p>
+        </div>
+        <div class="nc">
+          <h3>The AI shift</h3>
+          <ul>
+            <li><strong>Search becomes answers.</strong> AI Overviews, ChatGPT and Perplexity answer before anyone clicks, so brands compete to be cited.</li>
+            <li><strong>Targeting becomes AI buying.</strong> Marketers set goals, data and creative; the platform picks audience, placement and budget.</li>
+            <li><strong>Production becomes GenAI.</strong> One idea turns into hundreds of ad versions in days.</li>
+            <li><strong>Shopping goes social and agentic.</strong> TikTok Shop, Shopee Live, and AI agents that check out for you.</li>
+            <li><strong>New ad space.</strong> Ads in Google AI Overviews (SG, Dec 2025) and ChatGPT Ads (SG, 23 Sep 2026).</li>
+            <li><strong>Trust is the currency.</strong> Label AI content and protect authenticity.</li>
+          </ul>
+        </div>
+        <div class="nc wide">
+          <h3>Ten types of digital marketing platform</h3>
+          <dl class="deflist">
+            <div><dt>Social media</dt><dd>Reach, discovery, community and in-feed shopping</dd></div>
+            <div><dt>Influencer &amp; creator</dt><dd>Trust and social proof, now direct sales via affiliate links and LIVE</dd></div>
+            <div><dt>Content &amp; GenAI production</dt><dd>Thought leadership, nurturing leads, being cited by AI answers</dd></div>
+            <div><dt>Email, CRM &amp; messaging</dt><dd>Retention and repeat sales built on first-party data</dd></div>
+            <div><dt>Search: SEO, SEM &amp; GEO</dt><dd>High-intent demand, and being the brand the AI names</dd></div>
+            <div><dt>Programmatic &amp; retail media</dt><dd>Real-time buying, retargeting, reaching shoppers at purchase</dd></div>
+            <div><dt>Affiliate &amp; social commerce</dt><dd>Pay-for-performance sales through creators and partners</dd></div>
+            <div><dt>Mobile &amp; super-apps</dt><dd>Timely, location-based and in-app moments</dd></div>
+            <div><dt>Automation &amp; AI agents</dt><dd>Scaling journeys, versions, reports and service around the clock</dd></div>
+            <div><dt>Analytics &amp; measurement</dt><dd>Measuring performance and proving incrementality</dd></div>
+          </dl>
+        </div>
+        <div class="nc">
+          <h3>Key definitions</h3>
+          <ul>
+            <li><strong>Social media campaign:</strong> a planned series of content over a set period, aimed at an outcome that can be tracked.</li>
+            <li><strong>Social media strategy:</strong> the goals and tactics across channels, campaigns and media placements.</li>
+            <li><strong>Channel management:</strong> backing the best channel for each audience and goal. Prioritise, evaluate the tech, then measure and tweak.</li>
+            <li><strong>Ad campaigns:</strong> placing ads and investing in channels for better ROI. On a tight budget, run fewer, bigger ads and repurpose video across formats.</li>
+          </ul>
+        </div>
+        <div class="nc">
+          <h3>Data collection</h3>
+          <p>The struggles: limited first-party data, poor third-party data, hard segmentation and privacy rules.</p>
+          <ul>
+            <li>Build first-party data with core consumers and key media partners.</li>
+            <li>Keep collection compliant by working with legal and partnerships.</li>
+            <li>Reach people without tracking through contextual targeting and data clean rooms.</li>
+            <li>Let customers decide what they share, and allow opt-out.</li>
+          </ul>
+        </div>
+        <div class="nc">
+          <h3>Benchmarking</h3>
+          <p>Measuring a multichannel approach is hard because there is no common set of metrics. The two most used are <strong>transactional</strong> (sales, revenue, conversion) and <strong>competitive</strong> (market, voice and wallet share).</p>
+          <p>Then come engagement, perceptual, pipeline, relationship and awareness, plus a new family: <strong>AI visibility</strong>, how often AI answers mention your brand.</p>
+        </div>
+      </div>
+
+      <div class="sec-head refl"><h2 class="sec">Reflection</h2></div>
+      <div class="reflect">
+        <div class="rf"><span class="rf-k">The big idea</span><p>Every big platform now buys the audience for you, so the creative does the targeting. The skill shifts from choosing people to feeding the AI the right signals.</p></div>
+        <div class="rf"><span class="rf-k">For our project</span><p>Choose platforms by what our audience actually does there, using the DataReportal figures, and add AI visibility to our KPIs.</p></div>
+        <div class="rf"><span class="rf-k">Try this</span><p>Check your own screen time. Does your top app match the TikTok-beats-YouTube numbers from the slides?</p></div>
+      </div>
+
+      <div class="sec-head" id="games-s1"><h2 class="sec">Play the session</h2><span class="g-best" data-count="s1_types,s1_stats,s1_metrics"></span></div>
+      <div class="game" data-game="s1_types"></div>
+      <div class="game" data-game="s1_stats"></div>
+      <div class="game" data-game="s1_metrics"></div>
+    </section>
+
+    <section class="panel" id="p-s2" role="tabpanel" aria-labelledby="t-s2" hidden>
+      <div class="intro">
+        <p class="eyebrow">Session 2 · 9 Oct 2026 · Lecture</p>
+        <h2>The martech stack and the case for paid media</h2>
+        <p>Session 2 walked through Gartner's transit map and the 2026 martech landscape of 15,505 products, then sorted tools into point tools, platforms, suites and hubs, with AI copilots and agents as a new layer on top. It toured each social platform's own ad tools and closed on organic versus paid media.</p>
+        <p class="takeaway">Organic posts now reach roughly 3–5% of Instagram followers and about 1% on Facebook. Paid media buys reach, but only for as long as it is funded.</p>
+        <div class="g-actions"><button class="btn ghost" data-jump="games-s2">Skip to the games</button></div>
+      </div>
+
+      <div class="sec-head"><h2 class="sec">Session notes</h2></div>
+      <div class="notes">
+        <div class="nc">
+          <h3>Gartner's transit map</h3>
+          <ul>
+            <li><strong>Neighbourhoods</strong> are thematic domains, such as search, social or ad tech.</li>
+            <li><strong>Tracks</strong> group related technologies that serve one or more neighbourhoods.</li>
+            <li><strong>Stations</strong> are provider or product categories.</li>
+          </ul>
+          <p>The point: no single provider is best in class at everything, so marketers combine tools.</p>
+        </div>
+        <div class="nc">
+          <h3>Martech in 2026</h3>
+          <dl class="stats">
+            <div><dt>15,505</dt><dd>products on the 2026 martech landscape</dd></div>
+            <div><dt>+0.79%</dt><dd>growth, the slowest in 15 years (“peak martech”)</dd></div>
+            <div><dt>1,488</dt><dd>products added and 1,367 removed in one year</dd></div>
+            <div><dt>+21.4%</dt><dd>fastest-growing category: CMS and web experience</dd></div>
+          </dl>
+          <p>Takeaway: pick tools that share clean data, because AI is only as good as what it can connect to.</p>
+          <p class="src">Source: chiefmartec.com, May 2026</p>
+        </div>
+        <div class="nc wide">
+          <h3>Five types of tools</h3>
+          <dl class="deflist">
+            <div><dt>Point tools</dt><dd>One function, quick to set up, often best in class. More vendors and siloed reporting. Meltwater, Brand24, Mailchimp.</dd></div>
+            <div><dt>Platforms</dt><dd>Broad within one or two areas, extended through APIs. Risk of lock-in and longer setup. Salesforce Data 360.</dd></div>
+            <div><dt>Suites</dt><dd>Several products from one vendor with integration built in. Add-ons may lag behind. Oracle Eloqua, Marketo Engage, HubSpot.</dd></div>
+            <div><dt>Hubs</dt><dd>One portal that unifies operations, collaboration, data integration and analytics.</dd></div>
+            <div><dt>AI copilots &amp; agents</dt><dd>A new layer on top of the rest. Speed and scale, but less transparency and more brand-safety risk. Agentforce, Meta Business Agent, Google Ask Advisor.</dd></div>
+          </dl>
+        </div>
+        <div class="nc wide">
+          <h3>Each platform's own ad tools</h3>
+          <dl class="deflist">
+            <div><dt>TikTok for Business</dt><dd>Symphony for AI video, Spark Ads to boost creator posts, Smart+ and GMV Max for automated buying and Shop sales.</dd></div>
+            <div><dt>Meta Ads Manager</dt><dd>Advantage+ for audience, creative and budget; Business Agent selling on WhatsApp, Instagram and Messenger.</dd></div>
+            <div><dt>LinkedIn Campaign Manager</dt><dd>Targeting by job title, industry and company size; Thought Leader Ads, Lead Gen Forms, Message Ads, Accelerate.</dd></div>
+            <div><dt>YouTube (Google Ads)</dt><dd>Skippable in-stream ads, Demand Gen across Shorts, Discover and Gmail, and Gemini-powered Peak Points.</dd></div>
+            <div><dt>X Ads</dt><dd>Grok writes copy and visuals in Ads Manager; Promoted Posts and Custom Audiences.</dd></div>
+            <div><dt>Also on the radar</dt><dd>Threads ads, Pinterest Performance+, Reddit, ChatGPT Ads (SEA since 23 Sep 2026), and retail media on Shopee, Lazada, TikTok Shop and GrabAds.</dd></div>
+          </dl>
+        </div>
+        <div class="nc">
+          <h3>TikTok in Southeast Asia</h3>
+          <dl class="stats">
+            <div><dt>460M+</dt><dd>users in SEA: Indonesia 160M, Vietnam 70M, Thailand 50M</dd></div>
+            <div><dt>US$45.6B</dt><dd>TikTok Shop SEA GMV in 2025, double the year before</dd></div>
+          </dl>
+          <p>The 2020 “What makes you Tic?” case in South Africa shows the earlier growth story: over 100k new users and 1M+ film views in under two weeks.</p>
+        </div>
+        <div class="nc">
+          <h3>Organic vs paid</h3>
+          <p><strong>Organic</strong> is unpaid content that builds relationships, brand voice and community: regular posts, employee advocacy, replies, shared UGC.</p>
+          <p><strong>Paid</strong> rents premium space to reach a chosen audience: boosted posts, targeted campaigns, sponsored collaborations, retargeting, creator partnership ads and AI-automated campaigns.</p>
+          <p>Paid results last only while the budget runs.</p>
+        </div>
+      </div>
+
+      <div class="sec-head refl"><h2 class="sec">Reflection</h2></div>
+      <div class="reflect">
+        <div class="rf"><span class="rf-k">The big idea</span><p>No tool is best at everything, and AI is only as good as the data it can reach. Pick tools that share clean data.</p></div>
+        <div class="rf"><span class="rf-k">For our project</span><p>List the native tools we'd use on each platform (Spark Ads, Advantage+, Thought Leader Ads) and plan paid to boost the organic posts that already work.</p></div>
+        <div class="rf"><span class="rf-k">Try this</span><p>Open Meta's Ad Library and find a brand running the same post as organic content and as a paid ad.</p></div>
+      </div>
+
+      <div class="sec-head" id="games-s2"><h2 class="sec">Play the session</h2><span class="g-best" data-count="s2_stack,s2_features,s2_organic"></span></div>
+      <div class="game" data-game="s2_stack"></div>
+      <div class="game" data-game="s2_features"></div>
+      <div class="game" data-game="s2_organic"></div>
+    </section>
+
+    <section class="panel" id="p-launchlab" role="tabpanel" aria-labelledby="t-launchlab" hidden>
+      <div class="intro">
+        <p class="eyebrow">Session 2 · 9 Oct 2026 · Guest workshop · LaunchLab (Yibo, Nirvan, Rishabh)</p>
+        <h2>Design, build, deploy</h2>
+        <p>The first guest session showed how to ship a working website without hand-coding it: shape the look in Claude Design, hand it off to Claude Code to build, store it on GitHub and publish it with Vercel. It ended with Supabase for log-ins and data, and with this very assignment.</p>
+        <p class="takeaway">A vague prompt gets a vague site. Give the model a role, a goal, an audience, the pages, a style, the features and the output you expect.</p>
+        <div class="g-actions"><button class="btn ghost" data-jump="games-ll">Skip to the games</button></div>
+      </div>
+
+      <div class="sec-head"><h2 class="sec">Session notes</h2></div>
+      <div class="notes">
+        <div class="nc wide">
+          <h3>The whole workflow</h3>
+          <div class="flow"><span>Claude Design</span><i>→</i><span>Handoff to Claude Code</span><i>→</i><span>Build the files</span><i>→</i><span>Push to GitHub</span><i>→</i><span>Deploy on Vercel</span></div>
+          <p><strong>Design</strong> the look in Claude Design without writing code. <strong>Build</strong> by sending the design to Claude Code through Share, then “Handoff to Claude Code…”. <strong>Deploy</strong> on localhost or tiiny.host for a quick start, or through GitHub and Vercel for a site that updates itself.</p>
+        </div>
+        <div class="nc">
+          <h3>The art of prompting</h3>
+          <p>A bad prompt:</p>
+          <p class="bad-prompt">Create a website for my course.</p>
+          <p>A good prompt states a <strong>role</strong>, a <strong>goal</strong>, the <strong>target audience</strong>, the <strong>core pages</strong>, the <strong>design style</strong>, the <strong>key features</strong> and the <strong>output</strong> you want back, and asks for a build that can be expanded later.</p>
+        </div>
+        <div class="nc">
+          <h3>What Claude Code does</h3>
+          <p>An agentic coding system that reads a whole codebase, runs commands and debugs failures.</p>
+          <ul>
+            <li><strong>Routines:</strong> repeated background jobs, such as checking a folder for errors every hour.</li>
+            <li><strong>Refactoring:</strong> rename or tidy code without changing what it does.</li>
+            <li><strong>Session context:</strong> remembers commands run, earlier errors, changed files and the goal.</li>
+          </ul>
+        </div>
+        <div class="nc">
+          <h3>GitHub</h3>
+          <p>Stores the project and its history (the repository), shares it, and lets a team work without overwriting each other.</p>
+          <ul>
+            <li><strong>Push</strong> sends commits straight up, with no review. Use it solo or on your own branch.</li>
+            <li><strong>Pull request</strong> proposes changes for teammates to review before merging.</li>
+          </ul>
+        </div>
+        <div class="nc">
+          <h3>Vercel</h3>
+          <p>GitHub stores the code; Vercel turns it into a website.</p>
+          <ul>
+            <li>Sign in with GitHub and import the repo once.</li>
+            <li>Every push rebuilds the live site in seconds.</li>
+            <li>Every pull request gets its own preview link.</li>
+          </ul>
+        </div>
+        <div class="nc">
+          <h3>Three files to know</h3>
+          <dl class="stats">
+            <div><dt>.html</dt><dd>the words and structure people read</dd></div>
+            <div><dt>.css</dt><dd>the look: colours, fonts, spacing, phone vs laptop</dd></div>
+            <div><dt>.js</dt><dd>the behaviour: clicks, typing, submit</dd></div>
+          </dl>
+        </div>
+        <div class="nc">
+          <h3>Beyond a static site</h3>
+          <p>A plain site forgets every visitor and knows only its own files. Remembering users needs a backend.</p>
+          <ul>
+            <li><strong>Sign up</strong> adds a row with your email and a scrambled password.</li>
+            <li><strong>Log in</strong> checks them and hands the browser a token.</li>
+            <li><strong>Log out</strong> throws the token away.</li>
+          </ul>
+          <p><strong>Supabase</strong> provides log-in and a database, and connects to GitHub, Vercel and Lovable.</p>
+        </div>
+        <div class="nc">
+          <h3>The assignment</h3>
+          <p>Build a website with a tab for each guest speaker session this semester, each with an interactive game to consolidate what was learned, using the tools from this workshop. This site is that assignment.</p>
+        </div>
+      </div>
+
+      <div class="sec-head refl"><h2 class="sec">Reflection</h2></div>
+      <div class="reflect">
+        <div class="rf"><span class="rf-k">The big idea</span><p>A prompt works like a brief: role, goal, audience, pages, style, features and output. Vague in, vague out.</p></div>
+        <div class="rf"><span class="rf-k">For our project</span><p>We can mock up campaign pages the same way, design then build then deploy, and label them as AI-assisted.</p></div>
+        <div class="rf"><span class="rf-k">Try this</span><p>Rewrite one vague prompt you used this week in the seven-part structure and compare the results.</p></div>
+      </div>
+
+      <div class="sec-head" id="games-ll"><h2 class="sec">Play the session</h2><span class="g-best" data-count="ll_order,ll_prompt,ll_files,ll_roles,ll_git"></span></div>
+      <div class="game" data-game="ll_order"></div>
+      <div class="game" data-game="ll_prompt"></div>
+      <div class="game" data-game="ll_files"></div>
+      <div class="game" data-game="ll_roles"></div>
+      <div class="game" data-game="ll_git"></div>
+    </section>
+
+    <!-- SESSION 3 -->
+    <section class="panel" id="p-s3" role="tabpanel" aria-labelledby="t-s3" hidden>
+      <div class="intro">
+        <p class="eyebrow">Session 3 · 23 Oct 2026 · Lecture</p>
+        <h2>Media buying and the objective that steers it</h2>
+        <p>Session 3 made the case for paid media and for the agencies that buy it, then broke down Meta's six campaign objectives stage by stage of the funnel. It closed by launching the final group project: an omni-channel campaign with a $100,000 simulated budget and at least one AI component.</p>
+        <p class="takeaway">The objective is the GPS. It decides how the algorithm optimises delivery, who sees the ad, and how success is counted.</p>
+        <div class="g-actions"><button class="btn ghost" data-jump="games-s3">Skip to the games</button></div>
+      </div>
+
+      <div class="sec-head"><h2 class="sec">Session notes</h2></div>
+      <div class="notes">
+        <div class="nc wide">
+          <h3>Paid vs organic, side by side</h3>
+          <dl class="deflist">
+            <div><dt>Speed &amp; scale</dt><dd>Paid: immediate reach and traffic. Organic: slower growth that needs consistent engagement.</dd></div>
+            <div><dt>Targeting</dt><dd>Paid: precision by demographics, interests and behaviour. Organic: limited to followers and the algorithm.</dd></div>
+            <div><dt>Visibility</dt><dd>Paid: guaranteed, unaffected by algorithm changes. Organic: subject to the algorithm, unpredictable reach.</dd></div>
+            <div><dt>Conversion</dt><dd>Paid: optimised for sales, leads and visits. Organic: builds the brand story, fewer direct sales.</dd></div>
+            <div><dt>Competition</dt><dd>Paid: keeps the brand visible against rivals. Organic: easily drowned out by brands with budgets.</dd></div>
+            <div><dt>Cost</dt><dd>Paid: needs ongoing budget. Organic: free, but takes long-term effort.</dd></div>
+          </dl>
+          <p>The winning agency approach runs both: organic builds trust and community, paid reaches new audiences and boosts the organic posts that already work.</p>
+        </div>
+        <div class="nc">
+          <h3>The money in paid social</h3>
+          <dl class="stats">
+            <div><dt>US$339B</dt><dd>worldwide social ad spend projected for 2026 (Statista)</dd></div>
+            <div><dt>US$588M</dt><dd>Singapore social ad spend in 2025, up 15.2%, about a fifth of all ad spend</dd></div>
+            <div><dt>US$119M</dt><dd>Singapore influencer marketing</dd></div>
+            <div><dt>+8.3%</dt><dd>Asia-Pacific digital ad spend growth in 2026 (eMarketer)</dd></div>
+          </dl>
+        </div>
+        <div class="nc">
+          <h3>The catch with paid</h3>
+          <ul>
+            <li><strong>Cost:</strong> a small budget can't sustain it for long.</li>
+            <li><strong>Short-term:</strong> results stop when the spend stops.</li>
+            <li><strong>Authenticity:</strong> paid exposure builds less genuine connection.</li>
+            <li><strong>Black box:</strong> AI automation decides where the money goes, so you need your own measurement.</li>
+          </ul>
+        </div>
+        <div class="nc">
+          <h3>Why AI still needs a strategist</h3>
+          <ul>
+            <li><strong>Context:</strong> AI may raise budget because engagement spiked; a human checks what caused the spike.</li>
+            <li><strong>Data:</strong> bad data gives bad recommendations.</li>
+            <li><strong>Whose metric:</strong> platform AI optimises the platform's numbers; humans check what drove incremental sales.</li>
+            <li><strong>Creativity:</strong> stories, emotion and cultural nuance are still human strengths.</li>
+          </ul>
+        </div>
+        <div class="nc">
+          <h3>Media agencies in 2026</h3>
+          <ul>
+            <li>Omnicom completed its IPG acquisition in Nov 2025, about US$26B in revenue.</li>
+            <li>GroupM became WPP Media in May 2025.</li>
+            <li>Agency AI platforms: WPP Open, Publicis Marcel, Omnicom Omni, dentsu.Connect, Havas Converged.AI.</li>
+            <li>As platforms automate the buy, agencies shift to strategy, data, creative and measurement.</li>
+            <li>ChatGPT Ads in Southeast Asia are sold through the big holding companies as well as self-serve.</li>
+          </ul>
+        </div>
+        <div class="nc wide">
+          <h3>Meta's six objectives, down the funnel</h3>
+          <dl class="deflist">
+            <div><dt>Awareness · top</dt><dd>Brand awareness (people likely to remember you) or Reach (as many people as possible). A jewellery house launching a collection.</dd></div>
+            <div><dt>Traffic · middle</dt><dd>Link clicks, landing page views or Messenger. A retailer driving shoppers to its sale.</dd></div>
+            <div><dt>Engagement · middle</dt><dd>Post engagement, page likes, event responses, video views. An influencer pushing shares of a workout video.</dd></div>
+            <div><dt>Leads · middle</dt><dd>Instant forms, Messenger leads or website conversions. A skincare brand collecting enquiries.</dd></div>
+            <div><dt>App promotion · bottom</dt><dd>Installs, in-app events and retention. A mobile-first or subscription app.</dd></div>
+            <div><dt>Sales · bottom</dt><dd>Conversions, catalogue sales and store traffic. A multi-brand store retargeting past buyers.</dd></div>
+          </dl>
+        </div>
+        <div class="nc">
+          <h3>Optimise, and avoid the usual mistakes</h3>
+          <ul>
+            <li>Test several creatives, audiences and CTAs, and A/B test them.</li>
+            <li>Watch CTR, CPA and ROAS, and move budget and placements on performance.</li>
+            <li>Match the conversion window to the sales cycle.</li>
+            <li>Common mistakes: the wrong objective, ignoring data, not optimising, no custom or lookalike audiences, no clear CTA.</li>
+          </ul>
+        </div>
+        <div class="nc">
+          <h3>AI toolkit 2026, by job</h3>
+          <ul>
+            <li><strong>Research:</strong> ChatGPT, Claude, Gemini, Perplexity</li>
+            <li><strong>Images:</strong> Gemini, Midjourney, Firefly, Canva, Mujo.ai</li>
+            <li><strong>Video &amp; voice:</strong> Veo, Runway, Kling, Sora, HeyGen, ElevenLabs</li>
+            <li><strong>Platform-native:</strong> Advantage+ creative, Symphony, Asset Studio</li>
+            <li><strong>Listening:</strong> Brand24, Meltwater, Brandwatch</li>
+            <li><strong>Agents:</strong> Zapier, n8n, ManyChat, Meta Business Agent</li>
+          </ul>
+        </div>
+        <div class="nc wide">
+          <h3>The final project at a glance</h3>
+          <dl class="deflist">
+            <div><dt>Format</dt><dd>20-minute group pitch plus 5 minutes of Q&amp;A in Session 10, on 11 or 16 December.</dd></div>
+            <div><dt>Brief</dt><dd>An omni-channel campaign for a hypothetical new product from a real brand, such as Dyson launching speakers.</dd></div>
+            <div><dt>Must include</dt><dd>At least 2 platforms and at least 1 AI component, with the human decisions around it explained.</dd></div>
+            <div><dt>Budget</dt><dd>$100,000 simulated, split by platform and funnel stage, with benchmark costs sourced and 10–15% kept as a test-and-learn reserve.</dd></div>
+            <div><dt>Plan</dt><dd>A SMART objective, personas, content types, messaging, a 3-month timeline and KPIs per funnel stage.</dd></div>
+            <div><dt>AI disclosure</dt><dd>One slide listing the AI tools and key prompts used, and what was changed by hand. Label anything AI-generated.</dd></div>
+          </dl>
+          <p>Graded on creativity, fit with each platform and its audience, omni-channel storytelling, a feasible media plan, and how well the team justifies its decisions. Suggested check-in by Session 7: brand, objective, personas and a draft budget split.</p>
+        </div>
+      </div>
+
+      <div class="sec-head refl"><h2 class="sec">Reflection</h2></div>
+      <div class="reflect">
+        <div class="rf"><span class="rf-k">The big idea</span><p>Paid media is rented attention, and the objective is the instruction you give the algorithm. Pick the wrong one and the platform will find the wrong people very efficiently.</p></div>
+        <div class="rf"><span class="rf-k">For our project</span><p>Set one SMART objective per platform before thinking about creative, map each to a funnel stage, and protect 10–15% of the $100,000 for testing.</p></div>
+        <div class="rf"><span class="rf-k">Try this</span><p>For the next five ads in your feed, guess the Meta objective from the call to action. “Shop now” and “Learn more” point to very different campaigns.</p></div>
+      </div>
+
+      <div class="sec-head" id="games-s3"><h2 class="sec">Play the session</h2><span class="g-best" data-count="s3_obj,s3_human,s3_bench,s3_pack"></span></div>
+      <div class="game" data-game="s3_obj"></div>
+      <div class="game" data-game="s3_human"></div>
+      <div class="game" data-game="s3_bench"></div>
+      <div class="game" data-game="s3_pack"></div>
+    </section>
+
+    <!-- SESSION 4 -->
+    <section class="panel" id="p-s4" role="tabpanel" aria-labelledby="t-s4" hidden>
+      <div class="intro">
+        <p class="eyebrow">Session 4 · 30 Oct 2026 · Lecture</p>
+        <h2>Managing campaigns, starting from the brief</h2>
+        <p>Session 4 walked through who does what in a media team and how AI is changing each role, then spent most of its time on the most important document in a campaign: the brief. An agency proposal for WWF Singapore's workplace programme showed a brief turned into insight, creative and a 12-week media plan.</p>
+        <p class="takeaway">If the brief is unclear, don't guess. Send a reverse brief. AI can draft and stress-test it, but the objectives, budget and big idea stay with people.</p>
+        <div class="g-actions"><button class="btn ghost" data-jump="games-s4">Skip to the games</button></div>
+      </div>
+
+      <div class="sec-head"><h2 class="sec">Session notes</h2></div>
+      <div class="notes">
+        <div class="nc wide">
+          <h3>The media team, then and now</h3>
+          <dl class="deflist">
+            <div><dt>Strategist</dt><dd>Sets the strategy, channels, budgets and tactics. Now uses AI for research and scenarios but still owns the objective and big idea.</dd></div>
+            <div><dt>Buyer</dt><dd>Negotiates and buys placements for the best value and reach. Now sets goals, data and guardrails for AI buying tools.</dd></div>
+            <div><dt>Trader</dt><dd>Runs programmatic buying, optimising bids and placements in real time. Less manual bidding than before.</dd></div>
+            <div><dt>Analyst</dt><dd>Tracks performance and recommends optimisations. Now moving to incrementality tests and mix models such as Google Meridian and Meta Robyn.</dd></div>
+            <div><dt>Manager</dt><dd>Keeps timelines, budgets, deliverables and stakeholders on track. Now adds AI governance: use, disclosure, brand safety, privacy.</dd></div>
+            <div><dt>New roles</dt><dd>Creative-automation specialists, data engineers and measurement leads. Postings asking for “AI agent” skills grew 1,587% in 2025.</dd></div>
+          </dl>
+        </div>
+        <div class="nc wide">
+          <h3>From brief to plan</h3>
+          <div class="flow"><span>Brief received</span><i>→</i><span>Brief dissection</span><i>→</i><span>Brief questioning</span><i>→</i><span>Discovery call</span><i>→</i><span>Media planning</span></div>
+          <p>Then: <strong>research &amp; insights</strong> on audience, market and competitors, <strong>strategy development</strong> on channels, budgets and journey, and <strong>execution, optimisation &amp; measurement</strong> once the campaign is live.</p>
+        </div>
+        <div class="nc">
+          <h3>Four core components</h3>
+          <ul>
+            <li><strong>Goals:</strong> the broader outcome, such as brand awareness or sales.</li>
+            <li><strong>Target audience:</strong> who the campaign is for.</li>
+            <li><strong>Value proposition:</strong> why they'd choose this over a competitor.</li>
+            <li><strong>Metrics:</strong> the KPIs that track success.</li>
+          </ul>
+        </div>
+        <div class="nc">
+          <h3>Question the brief</h3>
+          <p>Check it is <strong>complete</strong> (budget, dates, assets), <strong>reliable</strong> (where did that data come from?) and <strong>actionable</strong>.</p>
+          <p>On the sample Netflix brief: What's the end date? Is $1.5M all media, and in what currency? Why only Gen Z? Are impressions the right metric for subscriber growth?</p>
+        </div>
+        <div class="nc">
+          <h3>The brief in the AI era</h3>
+          <ul>
+            <li><strong>Add:</strong> first-party data and conversion signals, how much creative the AI needs to test, and the measurement plan.</li>
+            <li><strong>AI rules:</strong> where AI may be used, disclosure, approvals, brand safety, privacy (Singapore's PDPA).</li>
+            <li><strong>New touchpoints:</strong> ChatGPT Ads (SG, Sep 2026) and AI Overviews ads (SG, Dec 2025).</li>
+            <li><strong>Stress-test:</strong> ask AI for gaps, then confirm with the client.</li>
+          </ul>
+        </div>
+        <div class="nc wide">
+          <h3>Case: WWF Singapore, Together Possible @ Work</h3>
+          <p>The brief: show what makes working with WWF unique, the benefits of employee engagement, and shift workplace giving in Singapore. The audience: productivity-driven senior professionals aged 30–50 who own culture and wellbeing.</p>
+          <dl class="deflist">
+            <div><dt>Insight 1</dt><dd>Employees put happiness, purpose and wellbeing over money. 44% would earn less to contribute to society.</dd></div>
+            <div><dt>Insight 2</dt><dd>CSR and team building feel extracurricular. Only 1 in 10 companies called CSR a top priority.</dd></div>
+            <div><dt>Shift</dt><dd>From pleasure-driven team bonding to purpose-driven engagement that helps employees and the planet.</dd></div>
+            <div><dt>Creative line</dt><dd>“Purpose is ours to create”, under the direction “Together we lead with purpose”.</dd></div>
+            <div><dt>Programmes</dt><dd>Together We Move (team building), Together We Give (workplace giving), Together We Raise (fundraising).</dd></div>
+            <div><dt>Content</dt><dd>Organic: testimonials, workshop sneak peeks, social impact. Paid: thought leadership, USP and lead-gen catalogue downloads.</dd></div>
+          </dl>
+        </div>
+        <div class="nc wide">
+          <h3>The WWF media plan, 12 weeks</h3>
+          <div class="tbl">
+            <table>
+              <thead><tr><th>Channel</th><th>Objective</th><th class="num">Budget</th><th class="num">Planned KPI</th><th class="num">Cost per unit</th></tr></thead>
+              <tbody>
+                <tr><td>Meta</td><td>Traffic</td><td class="num">$5,500</td><td class="num">6,111 clicks</td><td class="num">$0.90 / click</td></tr>
+                <tr><td>Meta</td><td>Lead form</td><td class="num">$7,017</td><td class="num">701 leads</td><td class="num">$10 / lead</td></tr>
+                <tr><td>LinkedIn</td><td>Awareness</td><td class="num">$3,500</td><td class="num">175K impr.</td><td class="num">$20 CPM</td></tr>
+                <tr><td>LinkedIn</td><td>Conversation ad</td><td class="num">$2,000</td><td class="num">40 chats</td><td class="num">$50 / chat</td></tr>
+                <tr><td>LinkedIn</td><td>Lead form</td><td class="num">$3,000</td><td class="num">50 leads</td><td class="num">$60 / lead</td></tr>
+                <tr><td>Google Search</td><td>Brand &amp; generic</td><td class="num">$1,200</td><td class="num">150 leads</td><td class="num">$8 / lead</td></tr>
+              </tbody>
+              <tfoot><tr><td colspan="2">Total, plus 15% handling fee</td><td class="num">$25,550</td><td colspan="2"></td></tr></tfoot>
+            </table>
+          </div>
+          <p>LinkedIn leads cost six times Meta's but are likely better qualified, so the plan tests $3,000 on each, compares cost per lead, then shifts the rest to the winner.</p>
+        </div>
+        <div class="nc">
+          <h3>B2B buying in 2026</h3>
+          <dl class="stats">
+            <div><dt>94%</dt><dd>of B2B buyers use AI chatbots during the journey</dd></div>
+            <div><dt>13 + 9</dt><dd>internal stakeholders and external influencers per purchase</dd></div>
+            <div><dt>53%</dt><dd>of buying cycles have procurement as a decision-maker</dd></div>
+          </dl>
+          <p class="src">Source: Forrester 2026; 6sense 2025</p>
+        </div>
+      </div>
+
+      <div class="sec-head refl"><h2 class="sec">Reflection</h2></div>
+      <div class="reflect">
+        <div class="rf"><span class="rf-k">The big idea</span><p>A good media person doesn't just answer the brief, they question it. The Netflix example had a budget with no currency and a metric that couldn't prove the goal.</p></div>
+        <div class="rf"><span class="rf-k">For our project</span><p>Write our own one-page brief on the four core components first, ask an AI to find the gaps, then decide the answers as a team. That doubles as our AI component.</p></div>
+        <div class="rf"><span class="rf-k">Try this</span><p>In the WWF plan, a LinkedIn lead costs $60 and a Meta lead $10. Decide what share of Meta leads would have to be junk before LinkedIn wins.</p></div>
+      </div>
+
+      <div class="sec-head" id="games-s4"><h2 class="sec">Play the session</h2><span class="g-best" data-count="s4_roles,s4_brief,s4_wwf"></span></div>
+      <div class="game" data-game="s4_roles"></div>
+      <div class="game" data-game="s4_brief"></div>
+      <div class="game" data-game="s4_wwf"></div>
+    </section>
+
+    <!-- YELLOW PAGES GUEST -->
+    <section class="panel" id="p-yp" role="tabpanel" aria-labelledby="t-yp" hidden>
+      <div class="intro">
+        <p class="eyebrow">Session 4 · 30 Oct 2026 · Guest session · Yellow Pages Singapore &amp; YP Academy</p>
+        <h2>Building an AI marketing team</h2>
+        <p>Nick Goh, CMO of Yellow Pages Singapore, marketing lead of YP Academy and CEO of INSPIRO Consulting, argued that AI in marketing is a people problem before it is a tool problem. He then built a working “AI marketing team” live in Claude, taking a fictional luxury handbag launch from an emailed brief to scored creative.</p>
+        <p class="takeaway">The AI earned the most trust when it said “to confirm”, flagged a target as unrealistic, or refused a request. Humans own every handoff.</p>
+        <div class="g-actions"><button class="btn ghost" data-jump="games-yp">Skip to the games</button></div>
+      </div>
+
+      <div class="sec-head"><h2 class="sec">Session notes</h2></div>
+      <div class="notes">
+        <div class="nc">
+          <h3>Why it's a people problem</h3>
+          <dl class="stats">
+            <div><dt>96% / 8%</dt><dd>of CMOs say they're transforming with AI, yet about 8% run campaigns with connected agents</dd></div>
+            <div><dt>15.3%</dt><dd>of marketing budgets go to AI, but only 30% of CMOs have the processes and skills to scale it</dd></div>
+            <div><dt>32%</dt><dd>of marketers get formal AI training; 62% say the lack holds them back</dd></div>
+            <div><dt>67%</dt><dd>of AI's impact comes from culture, managers and talent practices; individual skills only 32%</dd></div>
+          </dl>
+          <p class="src">Sources: BCG, Gartner, Marketing AI Institute, Microsoft</p>
+        </div>
+        <div class="nc">
+          <h3>In Singapore</h3>
+          <dl class="stats">
+            <div><dt>86%</dt><dd>of workers use AI at work, but only 37% had AI training in the past year</dd></div>
+            <div><dt>23.4%</dt><dd>SME AI adoption in 2025, up from 4.2% in 2023</dd></div>
+            <div><dt>70.4%</dt><dd>AI adoption among large firms</dd></div>
+          </dl>
+          <p class="src">Sources: IMDA Digital Economy Report 2026; Microsoft Work Trend Index 2026</p>
+        </div>
+        <div class="nc">
+          <h3>The new team shape</h3>
+          <ul>
+            <li><strong>Hub and spokes:</strong> governance, data and risk in a central hub; AI skills inside every team.</li>
+            <li><strong>Pods, not channels:</strong> 75% of CMOs are moving to small pods built around goals or segments.</li>
+            <li><strong>New roles:</strong> AI product owner, AI governance owner, GEO specialist, marketing science, AI champions.</li>
+            <li><strong>Everyone is an “agent boss”:</strong> treat agents like staff, with identity, permissions and reviews.</li>
+            <li><strong>Top skills:</strong> checking AI output (50%) and critical thinking (46%).</li>
+          </ul>
+        </div>
+        <div class="nc wide">
+          <h3>A 6-step roadmap</h3>
+          <div class="flow"><span>Map the work</span><i>→</i><span>Group into agent jobs</span><i>→</i><span>Redesign, don't bolt on</span><i>→</i><span>Start small, roll out in waves</span><i>→</i><span>Upskill and govern</span><i>→</i><span>Measure</span></div>
+          <p>Only 21% of companies have redesigned any workflow, yet redesign drives most of the profit impact. Fewer than 1 in 5 track KPIs from day one.</p>
+        </div>
+        <div class="nc wide">
+          <h3>The live demo: an AI marketing team in Claude</h3>
+          <p>A fictional launch invented for training: <strong>Terra</strong>, a luxury handbag with plant-based and recycled materials, S$5,800, 1,000 bags, a S$300,000 budget over 3 months in Singapore. Each team member was a saved skill, run in order inside one Claude project.</p>
+          <div class="flow"><span>Brief Builder</span><i>→</i><span>Brief Validator</span><i>→</i><span>Researcher Strategist</span><i>→</i><span>Messaging Hierarchy</span><i>→</i><span>KV Concept Builder</span><i>→</i><span>Creative Review Scorer</span><i>→</i><span>Compliance Check</span></div>
+          <dl class="deflist">
+            <div><dt>Brief Builder</dt><dd>Ran on a schedule, found the latest “Marketing Brief” email and drafted a brief, marking missing inputs [to confirm].</dd></div>
+            <div><dt>Brief Validator</dt><dd>Scored the brief against a checklist. The revision made boutique enquiries the primary objective.</dd></div>
+            <div><dt>Researcher Strategist</dt><dd>Used social data (SOMIN) and web search to find the hidden motivation: “She doesn't want a sustainable bag; she wants a bag she never has to justify.”</dd></div>
+            <div><dt>Messaging Hierarchy</dt><dd>Big idea “Nothing to Explain”, with “The Art of Renewal” as the visual territory and “Made to Be Kept” as the proof pillar.</dd></div>
+            <div><dt>KV Concept Builder</dt><dd>Wrote three key-visual concepts (Held, Reassembled, Years) and recommended the one with no unverified claims.</dd></div>
+            <div><dt>Creative Review Scorer</dt><dd>Scored work through three agency lenses: BBH, Ogilvy and McCann.</dd></div>
+          </dl>
+        </div>
+        <div class="nc">
+          <h3>Guardrails in action</h3>
+          <ul>
+            <li>Marked budget splits and dates [to confirm] rather than inventing them.</li>
+            <li>Flagged the 1M reach target as too high for Singapore's affluent audience.</li>
+            <li>Marked every material and durability claim [to verify].</li>
+            <li>Refused to put a real brand ambassador's face on a model, or to make the image look like an official ad.</li>
+          </ul>
+        </div>
+        <div class="nc">
+          <h3>The creative scores</h3>
+          <dl class="stats">
+            <div><dt>4.3/10</dt><dd>Desert feed post: pretty but generic, with placeholders left in</dd></div>
+            <div><dt>5.7/10</dt><dd>3-frame Story: good sequence, but frames 1 and 3 repeat</dd></div>
+            <div><dt>6.7/10</dt><dd>“Hand on the clasp”: desire and craft, with no claim needed</dd></div>
+          </dl>
+          <p>The desert setting leaned on travel, where the brand already posts most (38.1% vs 11.1% for rivals) and engages least.</p>
+        </div>
+      </div>
+
+      <div class="sec-head refl"><h2 class="sec">Reflection</h2></div>
+      <div class="reflect">
+        <div class="rf"><span class="rf-k">The big idea</span><p>An AI marketing team is a chain of narrow skills with a person at every handoff. The tools are the easy part; training, process and governance are where most firms fall short.</p></div>
+        <div class="rf"><span class="rf-k">For our project</span><p>Our AI component could be a small chain (brief, research, messaging, review) with one slide showing what we accepted, changed or rejected at each step.</p></div>
+        <div class="rf"><span class="rf-k">Try this</span><p>Before the pitch, score our own key visual three ways: as BBH, Ogilvy and McCann would judge it. Fix the weakest score first.</p></div>
+      </div>
+
+      <div class="sec-head" id="games-yp"><h2 class="sec">Play the session</h2><span class="g-best" data-count="yp_chain,yp_skill,yp_guard,yp_gap"></span></div>
+      <div class="game" data-game="yp_chain"></div>
+      <div class="game" data-game="yp_skill"></div>
+      <div class="game" data-game="yp_guard"></div>
+      <div class="game" data-game="yp_gap"></div>
+    </section>
+
+    <!-- SESSION 5 -->
+    <section class="panel" id="p-s5" role="tabpanel" aria-labelledby="t-s5" hidden>
+      <div class="intro">
+        <p class="eyebrow">Session 5 · 13 Nov 2026 · Lecture</p>
+        <h2>Audience insights and where to invest</h2>
+        <p>Session 5 followed a campaign from brief to launch, separated media strategy from the media plan, and laid out the six stages of planning. Most of it was about knowing the audience: qualitative insight versus quantitative size, the tools for each, what AI changes, and why not every customer is worth the same.</p>
+        <p class="takeaway">Size the market with research tools, size the reachable audience with platform tools, then let the AI find the people inside it.</p>
+        <div class="g-actions"><button class="btn ghost" data-jump="games-s5">Skip to the games</button></div>
+      </div>
+
+      <div class="sec-head"><h2 class="sec">Session notes</h2></div>
+      <div class="notes">
+        <div class="nc wide">
+          <h3>Six stages of media planning</h3>
+          <div class="flow"><span>Business context</span><i>→</i><span>Audience insights</span><i>→</i><span>Channel decisions</span><i>→</i><span>Investment decisions</span><i>→</i><span>Measurement plan</span><i>→</i><span>Media plan</span></div>
+          <p><strong>Media strategy</strong> is the high-level how, where and when. The <strong>media plan</strong> is the tactical detail: channels, budget split and timing. Planning is also about giving stakeholders confidence through well-founded decisions.</p>
+        </div>
+        <div class="nc">
+          <h3>A planner's challenges</h3>
+          <ul>
+            <li>A constantly changing media landscape</li>
+            <li>Budget constraints and stakeholder priorities</li>
+            <li>Finding the audience</li>
+            <li>Platform and channel fragmentation</li>
+            <li>Attribution and measurement</li>
+          </ul>
+        </div>
+        <div class="nc">
+          <h3>Insight vs size</h3>
+          <p><strong>Audience insights</strong> are qualitative: who they are and why they act. Use research tools (GWI, Nielsen) and site analytics (GA4).</p>
+          <p><strong>Audience size</strong> is quantitative: how many you can reach. Use the platforms where you'll buy (Meta, DV360, TikTok). Getting both right cuts media wastage, which is ads shown to people outside the target.</p>
+        </div>
+        <div class="nc">
+          <h3>Tools, paid and free</h3>
+          <ul>
+            <li><strong>Subscription:</strong> GWI, Nielsen, Semrush, Meltwater</li>
+            <li><strong>Site analytics:</strong> Google Analytics 4, Adobe Analytics</li>
+            <li><strong>Free:</strong> Google Trends, Think with Google, TikTok, Meta, Reddit and AI assistants</li>
+            <li><strong>Sizing:</strong> Google Keyword Planner, TikTok Audience Insights, LinkedIn forecasting, Meta audience tools</li>
+          </ul>
+        </div>
+        <div class="nc">
+          <h3>Questions that unlock insight</h3>
+          <ul>
+            <li>What are their online behaviours, and which channels do they use?</li>
+            <li>How do they research products, and what drives the purchase?</li>
+            <li>What content do they consume, and what are they interested in?</li>
+            <li>How do they feel about brands? Are there case studies of similar campaigns?</li>
+          </ul>
+        </div>
+        <div class="nc wide">
+          <h3>AI for audience insights</h3>
+          <dl class="deflist">
+            <div><dt>Deep research agents</dt><dd>ChatGPT, Gemini and Perplexity draft an audience brief in minutes. Always check the sources they cite.</dd></div>
+            <div><dt>AI inside the tools</dt><dd>GWI Spark, Meltwater Mira and Nielsen Ad Intel AI answer questions in plain language.</dd></div>
+            <div><dt>Renamed</dt><dd>Facebook IQ is now Meta Foresight; Semrush is now part of Adobe.</dd></div>
+            <div><dt>Synthetic audiences</dt><dd>AI “twins” answer surveys in hours. Aveeno cut a strategy brief from 30 days to 3.</dd></div>
+            <div><dt>But check the proof</dt><dd>Pew found AI twins flattened opinion (98% vs 42% on one question). Strat7 found willingness-to-pay 16% too high.</dd></div>
+            <div><dt>How to use it</dt><dd>Explore and form hypotheses with AI, validate with real data, and cap synthetic respondents at 10–20% of a sample.</dd></div>
+          </dl>
+        </div>
+        <div class="nc wide">
+          <h3>Audience sizing in the AI era</h3>
+          <dl class="deflist">
+            <div><dt>Meta</dt><dd>With Advantage+ audience, age and interests are only suggestions. Detailed-targeting exclusions were removed in 2025.</dd></div>
+            <div><dt>LinkedIn</dt><dd>Location is required and comes first. Minimum 300 members to serve, 50,000+ recommended.</dd></div>
+            <div><dt>TikTok</dt><dd>Audience Insights counts accounts that saw ads in the last 30 days, not people, and no under-18s.</dd></div>
+            <div><dt>Google</dt><dd>Keyword Planner forecasts at campaign level by city and device; Reach Planner adds weekly frequency benchmarks.</dd></div>
+          </dl>
+        </div>
+        <div class="nc">
+          <h3>Four investment principles</h3>
+          <ul>
+            <li><strong>Annual ROI:</strong> judge spend over 12 months, not one burst.</li>
+            <li><strong>Customer quality:</strong> a customer worth many repeat purchases can justify a higher acquisition cost.</li>
+            <li><strong>Design to learn:</strong> build tests into the plan.</li>
+            <li><strong>Long-term incrementality:</strong> fund what truly adds sales.</li>
+          </ul>
+        </div>
+        <div class="nc">
+          <h3>Customer quality, four types</h3>
+          <dl class="stats">
+            <div><dt>Star</dt><dd>gets high value from the brand and gives high value back</dd></div>
+            <div><dt>Vulnerable</dt><dd>very valuable to the brand, but gets little value in return</dd></div>
+            <div><dt>Free rider</dt><dd>loves the offers and samples, but isn't very profitable</dd></div>
+            <div><dt>Lost cause</dt><dd>gets little value and gives little profit</dd></div>
+          </dl>
+        </div>
+      </div>
+
+      <div class="sec-head refl"><h2 class="sec">Reflection</h2></div>
+      <div class="reflect">
+        <div class="rf"><span class="rf-k">The big idea</span><p>Insight and size are different questions with different tools. AI makes the first one fast and cheap, which is exactly why it needs checking against real data.</p></div>
+        <div class="rf"><span class="rf-k">For our project</span><p>Build each persona from free tools (Google Trends, Reddit, TikTok), then size it in Ads Manager and LinkedIn forecasting. Show both numbers in the pitch.</p></div>
+        <div class="rf"><span class="rf-k">Try this</span><p>Take the Sephora discussion: the content creator, the deal hunter, or the full-price loyalty member. Which one would you spend most to acquire, and why?</p></div>
+      </div>
+
+      <div class="sec-head" id="games-s5"><h2 class="sec">Play the session</h2><span class="g-best" data-count="s5_stages,s5_size,s5_quality,s5_myth"></span></div>
+      <div class="game" data-game="s5_stages"></div>
+      <div class="game" data-game="s5_size"></div>
+      <div class="game" data-game="s5_quality"></div>
+      <div class="game" data-game="s5_myth"></div>
+    </section>
+
+    <!-- LINKEDIN GUEST -->
+    <section class="panel" id="p-li" role="tabpanel" aria-labelledby="t-li" hidden>
+      <div class="intro">
+        <p class="eyebrow">Session 5 · 13 Nov 2026 · Guest session · LinkedIn</p>
+        <h2>LinkedIn in the era of LLMs, from SEO to GEO</h2>
+        <p>Cindy Leong, Head of Scaled Agency Development for LinkedIn in APAC, joined Session 5. She leads the team that builds the capabilities of independent agencies across the region. LinkedIn has more than a billion members, including executives from every Fortune 500 company, and earns from Talent, Marketing and Sales Solutions and Premium subscriptions.</p>
+        <p class="note"><strong>About this tab.</strong> The guest's own slides weren't in the shared deck, so these notes and games draw on the LinkedIn and GEO material from across the course: Sessions 1–5 and the WWF case.</p>
+        <p class="takeaway">B2B buyers now start with AI answers but still double-check with people. Being findable by AI and trusted by peers is the job.</p>
+        <div class="g-actions"><button class="btn ghost" data-jump="games-li">Skip to the games</button></div>
+      </div>
+
+      <div class="sec-head"><h2 class="sec">Session notes</h2></div>
+      <div class="notes">
+        <div class="nc wide">
+          <h3>The LinkedIn ad toolkit</h3>
+          <dl class="deflist">
+            <div><dt>Thought Leader Ads</dt><dd>Promote posts by executives and employees in the feed, for B2B credibility.</dd></div>
+            <div><dt>Lead Gen Forms</dt><dd>Capture leads with pre-filled forms, without anyone leaving LinkedIn.</dd></div>
+            <div><dt>Conversation Ads</dt><dd>A personal message with buttons, such as “Download catalogue” or “Tell me more”.</dd></div>
+            <div><dt>Accelerate</dt><dd>AI builds the campaign and keeps optimising it.</dd></div>
+            <div><dt>Targeting</dt><dd>Job title, industry, company size and member interests. WWF targeted CXOs and senior HR interested in sustainable business.</dd></div>
+            <div><dt>Sizing rules</dt><dd>Location first (it's required), at least 300 members to serve, 50,000+ recommended.</dd></div>
+          </dl>
+        </div>
+        <div class="nc">
+          <h3>How B2B buyers decide now</h3>
+          <ul>
+            <li><strong>AI starts the journey:</strong> 94% of B2B buyers use AI chatbots along the way.</li>
+            <li><strong>Bigger groups:</strong> 13 internal stakeholders and 9 external influencers per purchase.</li>
+            <li><strong>Procurement</strong> decides in 53% of cycles; over 60% of buyers trial before they commit.</li>
+            <li><strong>Trust is human:</strong> buyers check AI answers with colleagues, so thought leadership and employee voices matter more.</li>
+          </ul>
+        </div>
+        <div class="nc">
+          <h3>From SEO to GEO</h3>
+          <ul>
+            <li><strong>SEO</strong> ranks your pages in search results.</li>
+            <li><strong>GEO</strong> gets your brand named in AI answers, through clear answers, FAQs and well-structured content.</li>
+            <li><strong>AI visibility</strong> is now a metric family: share of AI answers, AI referral traffic, sentiment in AI summaries.</li>
+            <li>In Singapore, ChatGPT sends over 75% of AI referrals.</li>
+          </ul>
+        </div>
+        <div class="nc">
+          <h3>Paid space inside AI answers</h3>
+          <ul>
+            <li>Ads in Google AI Overviews, live in Singapore since Dec 2025.</li>
+            <li>ChatGPT Ads, live in Singapore since Sep 2026, sold self-serve and through the big agency groups.</li>
+            <li>Both now belong in the brief as new touchpoints.</li>
+          </ul>
+        </div>
+        <div class="nc">
+          <h3>The GEO check for our project</h3>
+          <p>Ask 3–5 AI assistants the questions a customer would ask. Note whether your brand and its competitors are recommended, and how you'd improve that. It counts as the project's required AI component.</p>
+        </div>
+      </div>
+
+      <div class="sec-head refl"><h2 class="sec">Reflection</h2></div>
+      <div class="reflect">
+        <div class="rf"><span class="rf-k">The big idea</span><p>Search used to send people to your page; now an AI answers before anyone clicks. LinkedIn sits where B2B buyers go to check those answers with real people.</p></div>
+        <div class="rf"><span class="rf-k">For our project</span><p>If our brief has a B2B angle, lead with Thought Leader Ads and Lead Gen Forms, budget for higher cost per lead, and add a GEO check slide.</p></div>
+        <div class="rf"><span class="rf-k">Try this</span><p>Ask three AI assistants the question your buyer would ask about your category. Write down who gets named, who doesn't, and which sources they cite.</p></div>
+      </div>
+
+      <div class="sec-head" id="games-li"><h2 class="sec">Play the session</h2><span class="g-best" data-count="li_format,li_geo,li_build,li_b2b"></span></div>
+      <div class="game" data-game="li_format"></div>
+      <div class="game" data-game="li_geo"></div>
+      <div class="game" data-game="li_build"></div>
+      <div class="game" data-game="li_b2b"></div>
+    </section>
+
+
+    <!-- ROAD AHEAD -->
+    <section class="panel" id="p-next" role="tabpanel" aria-labelledby="t-next" hidden>
+      <div class="intro">
+        <p class="eyebrow">Sessions 6–10 · From the course syllabus</p>
+        <h2>The road ahead</h2>
+        <p>These sessions haven't run yet, so there's nothing to revise from them. Each card shows what the syllabus says the session will cover and the game planned for its tab. When a session runs, its card becomes a stop on the road like the ones before it.</p>
+        <p class="note"><strong>Guest speakers still to come</strong> include CPXi Asia, Mujo AI, Cape.io, Media Publishares, M&amp;C Saatchi Performance, and platform teams from Google, TikTok, Pinterest and YouTube, depending on their availability.</p>
+      </div>
+      <div class="ahead" id="ahead"></div>
+    </section>
+
+    <!-- BUILD NOTES -->
+    <section class="panel" id="p-build" role="tabpanel" aria-labelledby="t-build" hidden>
+      <div class="intro">
+        <p class="eyebrow">Build notes</p>
+        <h2>How this site was built</h2>
+        <p>The site follows the workflow from the LaunchLab workshop, using the tools shown in class, and grows one stop at a time as sessions run.</p>
+      </div>
+      <div class="steps">
+        <div class="step"><h3>Design</h3><p>Started from a structured prompt (role, goal, audience, pages, style, features, output) and gave the site one idea: the course is a test drive. Road signs set the type and colour, the tab bar is a road, and your score is a driving licence.</p></div>
+        <div class="step"><h3>Build</h3><p>One self-contained page built with Claude. Four game engines (sort, higher-or-lower, order and build) are fed by question lists written from each session's slides, so adding a session means adding data, not new code.</p></div>
+        <div class="step"><h3>Deploy</h3><p>A single index.html, ready to push to a GitHub repository and import into Vercel, which redeploys on every push. Dropping it into tiiny.host works too.</p></div>
+      </div>
+      <div class="intro">
+        <h2 class="sec">Versions</h2>
+        <ul class="sources">
+          <li><strong>22 Oct:</strong> first release with Sessions 1–2 and the LaunchLab workshop; session content moved into its own tabs.</li>
+          <li><strong>18 Nov:</strong> added Sessions 3–5 and the Yellow Pages and LinkedIn guest sessions, with reflections for every session, and redesigned the look.</li>
+        </ul>
+      </div>
+      <div class="intro">
+        <h2 class="sec">Known limits</h2>
+        <p>Scores are saved in your own browser only, so they don't follow you to another device and there's no class leaderboard. That would need a backend such as Supabase, which the LaunchLab workshop covered. The LinkedIn tab draws on course material because the guest's own slides weren't shared.</p>
+      </div>
+      <div class="intro">
+        <h2 class="sec">Sources</h2>
+        <ul class="sources">
+          <li>Course syllabus, Digital Platforms Test Drive, ESSEC, October 2026 term</li>
+          <li>Session decks: 3 Oct, 9 Oct, 23 Oct, 30 Oct and 13 Nov 2026, including the figures quoted inside them</li>
+          <li>LaunchLab workshop deck, “Claude Design, Claude Code, GitHub and Vercel”, 9 Oct 2026</li>
+          <li>Nick Goh, “Building an AI Marketing Team”, YP Academy and Yellow Pages Singapore, 30 Oct 2026</li>
+          <li>WWF Singapore “Together Possible @ Work” proposal, as presented in Session 4</li>
+        </ul>
+      </div>
+      <div class="g-actions"><button class="btn ghost" id="reset">Reset my scores</button></div>
+    </section>
+
+  </div>
+</main>
+
+<footer><div class="wrap">Test Drive Revision Lab · Student assignment for Digital Platforms Test Drive, ESSEC Business School · Figures as quoted in the course slides. Brand cases are class examples; the luxury launch in the Yellow Pages demo was fictional.</div></footer>
+
+<script>
+(function(){
+"use strict";
+
+var TABS = [
+  {id:"start", code:"GO", name:"Start", kind:"start"},
+  {id:"s1", code:"S1", name:"Platforms", kind:"lec"},
+  {id:"s2", code:"S2", name:"Tools & paid", kind:"lec"},
+  {id:"launchlab", code:"G1", name:"LaunchLab", kind:"guest"},
+  {id:"s3", code:"S3", name:"Media buying", kind:"lec"},
+  {id:"s4", code:"S4", name:"The brief", kind:"lec"},
+  {id:"yp", code:"G2", name:"Yellow Pages", kind:"guest"},
+  {id:"s5", code:"S5", name:"Audiences", kind:"lec"},
+  {id:"li", code:"G3", name:"LinkedIn", kind:"guest"},
+  {id:"next", code:"S6+", name:"Road ahead", kind:"work"},
+  {id:"build", code:"i", name:"Build notes", kind:"info"}
+];
+
+var TYPES = ["Social media","Influencer & creator","Content & GenAI","Email, CRM & messaging","Search: SEO, SEM & GEO","Programmatic & retail media","Affiliate & social commerce","Mobile & super-apps","Automation & AI agents","Analytics & measurement"];
+
+var GAMES = {
+
+  s1_types:{type:"classify", title:"Name that platform type", blurb:"Each card is an example from the Session 1 deck. Pick which of the ten platform types it illustrates.", rounds:10, options:TYPES, items:[
+    {q:"Agoda makes its 2025 Singapore flight ads in-house with Veo, Runway and Kling, then runs them on YouTube, Meta and TikTok.", a:"Social media", why:"The deck's paid social example: GenAI creative fed into the feeds, where the algorithm finds the audience."},
+    {q:"Grab reposts customers' “best food delivery moments” in its Instagram Stories.", a:"Social media", why:"Organic social built on user-generated content."},
+    {q:"La Roche-Posay has top Singapore beauty creators host live Instagram tutorials for a new skincare line.", a:"Influencer & creator", why:"Paid creator partnerships for trust and social proof."},
+    {q:"Indonesian brands enter Malaysia through TikTok Shop creators, and some grow up to 50x through LIVE sales.", a:"Influencer & creator", why:"#LokalMendunia, the deck's hybrid creator example."},
+    {q:"Cathay Pacific publishes travel guides to lesser-known Asian destinations on its blog.", a:"Content & GenAI", why:"Organic content marketing. Well-structured guides are also what AI answer engines quote."},
+    {q:"Zalora sends “Wishlist Reminders” to bring shoppers back to items they saved.", a:"Email, CRM & messaging", why:"Retention built on first-party data."},
+    {q:"Sephora Asia pairs promotional emails with new-product tutorials that link to exclusive discounts.", a:"Email, CRM & messaging", why:"Hybrid email: content plus offer."},
+    {q:"Lazada bids on terms like “best Ramadan discounts” in Indonesia during the festive season.", a:"Search: SEO, SEM & GEO", why:"Paid search captures high-intent demand at the moment of need."},
+    {q:"Vietnam Airlines optimises its content for queries like “cheap flights to Da Nang”.", a:"Search: SEO, SEM & GEO", why:"Organic search. GEO adds clear answers and FAQs so AI tools name the brand."},
+    {q:"WPP Media and GrabAds use anonymised transaction and location signals to plan media across six SEA markets.", a:"Programmatic & retail media", why:"Retail media puts ads next to real purchase data."},
+    {q:"Guardian pays Singapore beauty creators to embed referral links in YouTube vlogs and Instagram posts.", a:"Affiliate & social commerce", why:"Pay-for-performance sales through partners."},
+    {q:"Lazada affiliates in the Philippines push best-sellers in Facebook groups without direct sponsorship.", a:"Affiliate & social commerce", why:"Organic affiliate activity, paid on commission."},
+    {q:"Shopee shows in-app pop-ups for discounted products.", a:"Mobile & super-apps", why:"Timely in-app moments inside a super-app where payment and shopping already sit."},
+    {q:"Nestlé and Lazada pilot the LazzieChat AI shopping assistant in-app in Singapore, Malaysia and Indonesia.", a:"Mobile & super-apps", why:"The deck's AI example for mobile and super-apps (Apr 2026)."},
+    {q:"Singapore Airlines builds Agentforce-powered customer-service tools with Salesforce.", a:"Automation & AI agents", why:"Automation has moved from triggers to agents that act on a goal."},
+    {q:"Malaysian startups use Mailchimp's free tier to send automated welcome emails to new sign-ups.", a:"Automation & AI agents", why:"Listed in the deck as organic marketing automation: a triggered welcome journey."},
+    {q:"Google opens its Meridian marketing-mix model to all advertisers as open source.", a:"Analytics & measurement", why:"The more AI buys for you, the more you need independent proof of what worked."},
+    {q:"Adobe Analytics powers enterprise-level reporting for Lazada's campaigns across SEA.", a:"Analytics & measurement", why:"Paid enterprise analytics."}
+  ]},
+
+  s1_stats:{type:"higherlower", title:"Higher or lower", blurb:"Two platforms, one statistic from the Session 1 deck. Tap the one with the higher figure.", rounds:8, items:[
+    {q:"Average daily time per active user on the Android app, Aug 2025", a:["TikTok","1h 37m",97], b:["YouTube","1h 25m",85], src:"Similarweb via DataReportal, Oct 2025"},
+    {q:"Average daily time per active user on the Android app, Aug 2025", a:["Instagram","1h 13m",73], b:["Facebook","1h 07m",67], src:"Similarweb via DataReportal, Oct 2025"},
+    {q:"Average daily time per active user on the Android app, Aug 2025", a:["Pinterest","0h 10m",10], b:["LinkedIn","0h 06m",6], src:"Similarweb via DataReportal, Oct 2025"},
+    {q:"Internet users 16+ who used the platform in the past month", a:["Facebook","56.9%",56.9], b:["YouTube","55.4%",55.4], src:"GWI Q2 2025 via DataReportal"},
+    {q:"Internet users 16+ who used the platform in the past month", a:["TikTok","36.0%",36.0], b:["Telegram","33.8%",33.8], src:"GWI Q2 2025 via DataReportal"},
+    {q:"Active users who use the platform to follow or research brands", a:["Instagram","62.8%",62.8], b:["TikTok","56.2%",56.2], src:"GWI Q2 2025 via DataReportal"},
+    {q:"Active users who use the platform to follow or research brands", a:["X","38.1%",38.1], b:["Pinterest","36.1%",36.1], src:"GWI Q2 2025 via DataReportal"},
+    {q:"Share of social media referral traffic to websites, Aug 2025", a:["YouTube","3.73%",3.73], b:["Pinterest","3.51%",3.51], src:"Statcounter via DataReportal"},
+    {q:"Share of social media referral traffic to websites, Aug 2025", a:["Instagram","8.60%",8.60], b:["X","6.82%",6.82], src:"Statcounter via DataReportal"},
+    {q:"Internet users who discover new brands through this channel", a:["Search engines","32.9%",32.9], b:["TV ads","31.8%",31.8], src:"GWI Q2 2025 via DataReportal"},
+    {q:"Internet users who discover new brands through this channel", a:["Social media ads","30.4%",30.4], b:["Word of mouth","29.1%",29.1], src:"GWI Q2 2025 via DataReportal"},
+    {q:"Social media users who name it their favourite platform", a:["WhatsApp","17.4%",17.4], b:["Instagram","16.4%",16.4], src:"GWI Q2 2025 via DataReportal"},
+    {q:"Main reason for using social media", a:["Reading news stories","35.4%",35.4], b:["Finding products to buy","27.3%",27.3], src:"GWI Q2 2025 via DataReportal"},
+    {q:"Average social platforms used each month, men", a:["Age 16–24","7.67",7.67], b:["Age 25–34","7.48",7.48], src:"GWI Q2 2025 via DataReportal"}
+  ]},
+
+  s1_metrics:{type:"classify", title:"Metric sorter", blurb:"Session 1 listed eight families of benchmarking metrics. Put each metric in its family.", rounds:10,
+    options:["Transactional","Competitive","Engagement","Perceptual","Pipeline","Relationship","Awareness","AI visibility"], items:[
+    {q:"Revenue", a:"Transactional", why:"Transactional metrics are individual KPIs such as sales, revenue and conversion rate."},
+    {q:"Conversion rate", a:"Transactional", why:"A transactional KPI."},
+    {q:"Share of voice", a:"Competitive", why:"Competitive metrics compare you to the market: market share, voice share, wallet share."},
+    {q:"Wallet share", a:"Competitive", why:"How much of a customer's category spend comes to you."},
+    {q:"Email open rate", a:"Engagement", why:"Engagement covers social interactions, open rates and click-throughs."},
+    {q:"Click-through rate", a:"Engagement", why:"An engagement metric."},
+    {q:"Net Promoter Score", a:"Perceptual", why:"Perceptual metrics measure how customers feel: CSAT, effort score, NPS."},
+    {q:"Customer effort score", a:"Perceptual", why:"A perceptual metric."},
+    {q:"Cost per lead", a:"Pipeline", why:"Pipeline metrics: lead quality, time to close, cost per lead."},
+    {q:"Time taken to close a deal", a:"Pipeline", why:"A pipeline metric."},
+    {q:"Customer lifetime value", a:"Relationship", why:"The relationship metric in the deck."},
+    {q:"Unaided brand awareness", a:"Awareness", why:"Awareness covers aided and unaided awareness and earned reach."},
+    {q:"Earned reach", a:"Awareness", why:"An awareness metric."},
+    {q:"Share of AI answers that mention your brand", a:"AI visibility", why:"The newest family: how often ChatGPT, Gemini or Perplexity name you."},
+    {q:"Referral traffic from AI assistants", a:"AI visibility", why:"In Singapore, ChatGPT drives over 75% of AI referrals."},
+    {q:"Sentiment in AI-generated summaries of your brand", a:"AI visibility", why:"An AI visibility metric."}
+  ]},
+
+  s2_stack:{type:"classify", title:"Stack it", blurb:"Is it a point tool, a platform, a suite, a hub, or part of the new AI layer on top? Session 2's five tool types.", rounds:8,
+    options:["Point tool","Platform","Suite","Hub","AI copilot or agent"], items:[
+    {q:"Meltwater, a social listening tool", a:"Point tool", why:"Point tools do one marketing job in one area, and do it well."},
+    {q:"Brand24, for tracking brand mentions", a:"Point tool", why:"A single-function tool."},
+    {q:"Mailchimp, for email campaigns", a:"Point tool", why:"Named in the deck as a point tool, now with built-in AI features."},
+    {q:"Salesforce Data 360 (formerly Data Cloud)", a:"Platform", why:"A customer data platform: broad within one or two areas, extended through APIs."},
+    {q:"A tool that covers one area in depth and exposes its features through an API so you can build custom extensions", a:"Platform", why:"That is the definition of a platform. The risk is dependence on it."},
+    {q:"Oracle Eloqua", a:"Suite", why:"Several products from one vendor with integration built in."},
+    {q:"Adobe Marketo Engage", a:"Suite", why:"A suite, with core functions plus add-on modules."},
+    {q:"HubSpot, now adding Breeze AI agents", a:"Suite", why:"The deck's suite example. Add-on modules may not be best in class."},
+    {q:"One portal where the team signs in, runs workflows, merges data from several apps and reports across channels", a:"Hub", why:"A hub unifies operations, collaboration, data integration and analytics."},
+    {q:"Microsoft Copilot drafting a campaign brief and a first report", a:"AI copilot or agent", why:"Copilots help marketers work faster on briefs, copy and reports."},
+    {q:"Meta Business Agent answering questions and closing sales on WhatsApp", a:"AI copilot or agent", why:"An agent takes a goal and acts across tools (Jun 2026)."},
+    {q:"Google Ask Advisor, one agent across Ads, Analytics and Merchant Center", a:"AI copilot or agent", why:"Announced at Google Marketing Live, May 2026."}
+  ]},
+
+  s2_features:{type:"classify", title:"Whose feature is it?", blurb:"Session 2 toured each platform's own ad tools. Match the feature to the platform.", rounds:10,
+    options:["TikTok","Meta","LinkedIn","YouTube / Google","X","Pinterest"], items:[
+    {q:"Symphony: AI that makes and translates video ads", a:"TikTok", why:"TikTok's GenAI creative suite."},
+    {q:"Spark Ads: boost a creator's organic post as an ad", a:"TikTok", why:"Creator content run as paid media."},
+    {q:"GMV Max: automated campaigns for Shop sales", a:"TikTok", why:"Paired with Smart+ for AI targeting, bids and creative."},
+    {q:"Creator AI Search: match a brief to the right creators", a:"TikTok", why:"Launched at TikTok World, May 2026."},
+    {q:"Advantage+ Creative: GenAI image, text and video variations", a:"Meta", why:"Part of Meta's Advantage+ automation."},
+    {q:"Business Agent: an AI agent selling on WhatsApp, Instagram and Messenger", a:"Meta", why:"Launched June 2026."},
+    {q:"Advantage+ Campaign Budget: shifts spend to the best-performing ads", a:"Meta", why:"Automated budget allocation."},
+    {q:"Thought Leader Ads: promote employees' posts in the feed", a:"LinkedIn", why:"LinkedIn's format for B2B credibility."},
+    {q:"Lead Gen Forms: capture leads without users leaving the platform", a:"LinkedIn", why:"A LinkedIn Campaign Manager staple."},
+    {q:"Message Ads: personalised messages to targeted prospects", a:"LinkedIn", why:"Direct outreach inside LinkedIn."},
+    {q:"Accelerate: AI builds and auto-optimises campaigns", a:"LinkedIn", why:"LinkedIn's AI campaign builder."},
+    {q:"Peak Points: AI places ads right after a video's most engaging moment", a:"YouTube / Google", why:"Powered by Gemini."},
+    {q:"Demand Gen: AI campaigns across Shorts, Discover and Gmail", a:"YouTube / Google", why:"Google Ads' visual demand campaigns."},
+    {q:"Skippable in-stream: skip after 5 seconds, pay on a 30-second view or click", a:"YouTube / Google", why:"The classic YouTube format."},
+    {q:"Grok in Ads Manager: writes copy and visuals from your URL", a:"X", why:"X's built-in AI assistant for advertisers."},
+    {q:"Promoted Posts, formerly Promoted Tweets", a:"X", why:"The renamed core X ad format."},
+    {q:"Performance+: AI automates visual-search shopping campaigns", a:"Pinterest", why:"On Session 2's ‘also on the radar’ list."}
+  ]},
+
+  s2_organic:{type:"classify", title:"Organic or paid?", blurb:"Session 2 drew the line between organic and paid social. Sort each activity.", rounds:10,
+    options:["Organic","Paid"], items:[
+    {q:"Posting three Reels a week without boosting them", a:"Organic", why:"Unpaid content, seen by a small share of followers."},
+    {q:"Boosting your best-performing post", a:"Paid", why:"A boosted post is paid reach."},
+    {q:"Staff sharing company news with their own networks", a:"Organic", why:"Employee advocacy."},
+    {q:"Retargeting people who abandoned their cart", a:"Paid", why:"Retargeting campaigns are paid."},
+    {q:"Replying to comments and DMs in the brand's voice", a:"Organic", why:"Authentic engagement is organic."},
+    {q:"Running a creator's video as a Spark Ad", a:"Paid", why:"Creator partnership ads are paid media."},
+    {q:"Reposting customers' photos of your product", a:"Organic", why:"Sharing UGC builds community at no media cost."},
+    {q:"An Advantage+ campaign choosing audience and placement for you", a:"Paid", why:"AI-automated campaigns run on ad budget."},
+    {q:"A sponsored collaboration with a creator", a:"Paid", why:"Sponsored means paid."},
+    {q:"Someone finds your post because they follow a hashtag", a:"Organic", why:"Hashtag followers are one of the routes organic posts travel."},
+    {q:"A pre-roll ad before a YouTube video", a:"Paid", why:"In-stream video ads are bought media."}
+  ]},
+
+  ll_order:{type:"order", title:"Ship it in order", blurb:"Put the LaunchLab workflow in the right order, from first idea to a site that updates itself. Use the arrows to move steps.",
+    steps:[
+      "Write a detailed prompt and shape the look in Claude Design",
+      "Open Share and choose “Handoff to Claude Code”",
+      "Claude Code builds the working files",
+      "Create a new public repository on GitHub",
+      "Ask Claude Code to commit and push the project to that repo",
+      "Sign in to Vercel with GitHub and import the repo",
+      "Click Deploy to get a live public link",
+      "Push a change later and Vercel rebuilds the site automatically"
+    ]},
+
+  ll_prompt:{type:"prompt", title:"Fix the prompt", blurb:"The workshop's bad prompt was “Create a website for my course”. Pick the ingredients that turn it into a good one. Some chips are traps.",
+    chips:[
+      {k:"Role", text:"Role: You are an expert educational web designer and full-stack developer.", good:true, tip:"Tell the model who to be."},
+      {k:"Goal", text:"Goal: Build a responsive revision site for the Digital Platforms Test Drive course.", good:true, tip:"Say exactly what you want built."},
+      {k:"Audience", text:"Target audience: MSc marketing students revising between sessions.", good:true, tip:"Name who will use it."},
+      {k:"Core pages", text:"Core pages: a start page, one tab per session, and a build notes page.", good:true, tip:"List the pages or sections."},
+      {k:"Design style", text:"Design style: clean and confident, mobile-first, light and dark modes.", good:true, tip:"Describe the look and feel."},
+      {k:"Key features", text:"Key features: an interactive game in each tab, a running score, clear buttons.", good:true, tip:"Spell out what it must do."},
+      {k:"Output", text:"Output: folder structure, page code, a reusable game template, and a short note on design decisions.", good:true, tip:"Say what you want handed back."},
+      {k:"“Make it amazing”", text:"Make it look amazing.", good:false, tip:"Vague praise gives the model nothing to act on."},
+      {k:"ALL CAPS", text:"MAKE IT MODERN!!!", good:false, tip:"Shouting adds no information."},
+      {k:"“Do whatever”", text:"Just do whatever you think is best.", good:false, tip:"This hands away every decision the prompt should make."}
+    ]},
+
+  ll_files:{type:"classify", title:"Which file do you open?", blurb:"The workshop's three files: index.html for content, styles.css for the look, script.js for behaviour.", rounds:8,
+    options:["index.html","styles.css","script.js"], items:[
+    {q:"Change the text on your main button", a:"index.html", why:"Words and structure live in the HTML."},
+    {q:"Make that button orange", a:"styles.css", why:"Colours, fonts and spacing live in the CSS."},
+    {q:"Make the button do something when clicked", a:"script.js", why:"Behaviour lives in the JavaScript."},
+    {q:"Add a heading for Session 3", a:"index.html", why:"New content goes in the HTML."},
+    {q:"Change how the layout looks on a phone", a:"styles.css", why:"Responsive rules are CSS."},
+    {q:"Check a form field before it submits", a:"script.js", why:"Validation on submit is behaviour."},
+    {q:"Swap the page's font", a:"styles.css", why:"Typography is styling."},
+    {q:"Add a paragraph about the course", a:"index.html", why:"Content people read is HTML."},
+    {q:"Show a score when the game ends", a:"script.js", why:"Reacting to what the user did is JavaScript."},
+    {q:"Change the spacing between cards", a:"styles.css", why:"Spacing is CSS."}
+  ]},
+
+  ll_roles:{type:"classify", title:"Who does what?", blurb:"Six tools from the workshop. Match each job to the tool that does it.", rounds:8,
+    options:["Claude Design","Claude Code","GitHub","Vercel","Supabase","tiiny.host"], items:[
+    {q:"Build the visual shell of a site by describing it, with no code", a:"Claude Design", why:"Design first, then hand off."},
+    {q:"Read the whole codebase, run shell commands and debug failures", a:"Claude Code", why:"An agentic coding system that works in your project."},
+    {q:"Rename a variable everywhere it appears in the project", a:"Claude Code", why:"Refactoring without changing what the code does."},
+    {q:"Store every file and every version, shared with your team", a:"GitHub", why:"The repository is the project's online home."},
+    {q:"Let teammates propose changes and review them before they are merged", a:"GitHub", why:"That is a pull request."},
+    {q:"Turn a repository into a live link that updates on every push", a:"Vercel", why:"Vercel reads the repo, builds the site and hosts it."},
+    {q:"Give every pull request its own preview link", a:"Vercel", why:"So the team can see changes before merging."},
+    {q:"Add sign-up, log-in and a database so the site remembers users", a:"Supabase", why:"A backend-as-a-service for auth and data."},
+    {q:"Hand a logged-in browser a token after checking email and password", a:"Supabase", why:"Logging in is just an API call to the backend."},
+    {q:"Drag and drop a zipped folder with index.html at the top level to publish it", a:"tiiny.host", why:"The workshop's simplest hosting option."}
+  ]},
+
+  ll_git:{type:"classify", title:"Git vocabulary", blurb:"The six Git terms from the workshop. Match each description to its term.", rounds:6,
+    options:["Fork","Clone","Commit","Push","Pull request","Merge"], items:[
+    {q:"Make your own copy of someone else's repo on your GitHub account", a:"Fork", why:"You can change a fork without touching the original."},
+    {q:"Copy a repo from GitHub down to your computer to edit locally", a:"Clone", why:"Clone brings the remote copy down."},
+    {q:"Save a snapshot of your changes with a short note. It stays on your computer", a:"Commit", why:"A commit is local until you push."},
+    {q:"Send your saved snapshots up to GitHub", a:"Push", why:"Push updates the online copy."},
+    {q:"Propose your changes and ask teammates to review them", a:"Pull request", why:"Use it on a team or someone else's project."},
+    {q:"Approve reviewed changes and combine them into the main project", a:"Merge", why:"Merge closes the loop on a pull request."}
+  ]},
+  s3_obj:{type:"classify", title:"Pick the objective", blurb:"Each card is a campaign goal. Choose the Meta objective that would steer the algorithm the right way.", rounds:8,
+    options:["Awareness","Traffic","Engagement","Leads","App promotion","Sales"], items:[
+    {q:"A jewellery house wants high-value audiences to remember its new collection.", a:"Awareness", why:"Brand awareness optimises for people likely to remember you. Top of funnel."},
+    {q:"A phone brand wants as many people as possible to see its ad before a launch event.", a:"Awareness", why:"Reach, inside the Awareness objective, maximises the number of people who see the ad."},
+    {q:"A fashion retailer wants shoppers to land on its sale page.", a:"Traffic", why:"Traffic drives people to a destination: a website, app or Messenger."},
+    {q:"A publisher only wants to count readers whose article page actually loads.", a:"Traffic", why:"Landing page views, a Traffic option, count people only once the page has loaded."},
+    {q:"A wellness influencer wants more shares of a workout video.", a:"Engagement", why:"Engagement optimises for likes, comments and shares."},
+    {q:"A brand wants more people to respond “Going” to its event.", a:"Engagement", why:"Event responses sit inside the Engagement objective."},
+    {q:"A skincare brand wants contact details from people who'd like to try a product.", a:"Leads", why:"Instant forms collect details without anyone leaving Facebook or Instagram."},
+    {q:"A B2B software company wants prospects to request a demo.", a:"Leads", why:"Session 3's example: B2B prioritises Leads, e-commerce prioritises Sales."},
+    {q:"A mobile game wants more downloads.", a:"App promotion", why:"App installs target people likely to download."},
+    {q:"A subscription app wants lapsed users to come back.", a:"App promotion", why:"Retention, inside App promotion, brings users back after download."},
+    {q:"A multi-brand store shows past customers the products they browsed.", a:"Sales", why:"Catalogue sales use dynamic ads showing relevant products."},
+    {q:"A local shop wants more people walking through its door.", a:"Sales", why:"Store traffic is part of the Sales objective."},
+    {q:"An online brand optimises for add-to-cart and checkout.", a:"Sales", why:"Conversions, inside Sales, optimise for purchase actions. Bottom of funnel."}
+  ]},
+
+  s3_human:{type:"classify", title:"AI or the strategist?", blurb:"Session 3's formula was AI plus human expertise. Decide who should own each call.", rounds:8,
+    options:["Let the AI run it","Human call"], items:[
+    {q:"Adjust bids across thousands of auctions in real time.", a:"Let the AI run it", why:"Speed and scale are where automation earns its keep."},
+    {q:"Engagement spiked after a news story. Should the budget go up?", a:"Human call", why:"The deck's example: AI may raise budget on engagement; a strategist checks the outside cause first."},
+    {q:"Generate 50 headline variations for testing.", a:"Let the AI run it", why:"Variation at volume is a GenAI strength. A human still picks the brand-right ones."},
+    {q:"Decide how the brand should be positioned against rivals.", a:"Human call", why:"AI follows data but doesn't always understand brand positioning."},
+    {q:"Find new people who look like existing customers.", a:"Let the AI run it", why:"Lookalike and Advantage+ audiences are built for this."},
+    {q:"Check whether the sales the platform reports were truly extra sales.", a:"Human call", why:"Platform AI optimises its own metrics. Humans test what drove incremental sales."},
+    {q:"Move budget between ad sets toward the best cost per result.", a:"Let the AI run it", why:"Automated budget allocation does this continuously."},
+    {q:"Change the message after a real-world event shifts the public mood.", a:"Human call", why:"Humans pivot quickly on cultural context AI can miss."},
+    {q:"Notice the conversion data is broken before it skews targeting.", a:"Human call", why:"Bad data means bad recommendations. Someone has to catch it."},
+    {q:"Spread ads across Feed, Reels and Stories placements.", a:"Let the AI run it", why:"Automatic placements let the system find the cheapest results."}
+  ]},
+
+  s3_bench:{type:"higherlower", title:"Benchmark duel", blurb:"Numbers from Session 3's market and benchmark slides. Tap the higher one.", rounds:6, items:[
+    {q:"Average organic engagement rate by followers, 2026", a:["TikTok","2.60%",2.60], b:["Instagram","0.48%",0.48], src:"Socialinsider 2026 benchmarks"},
+    {q:"Average organic engagement rate by followers, 2026", a:["Instagram","0.48%",0.48], b:["Facebook","0.15%",0.15], src:"Socialinsider 2026 benchmarks"},
+    {q:"Average organic engagement rate by followers, 2026", a:["Facebook","0.15%",0.15], b:["X","0.12%",0.12], src:"Socialinsider 2026 benchmarks"},
+    {q:"Singapore spend in 2025", a:["Social media ads","US$588M",588], b:["Influencer marketing","US$119M",119], src:"DataReportal Digital 2026 Singapore"},
+    {q:"Share of followers an organic post reaches, 2026", a:["Instagram","~3–5%",4], b:["Facebook","~1%",1], src:"Session 3 deck"},
+    {q:"Growth rate quoted in Session 3", a:["Singapore social ad spend, 2025","+15.2%",15.2], b:["APAC digital ad spend, 2026","+8.3%",8.3], src:"DataReportal; eMarketer"},
+    {q:"Share of Singapore's population", a:["Social media users","90.6%",90.6], b:["Monthly ChatGPT users","~33%",33], src:"DataReportal Digital 2026 Singapore"}
+  ]},
+
+  s3_pack:{type:"prompt", title:"Pack the final project", blurb:"Session 3 set out what the final pitch must contain. Switch on everything it needs. Some chips are traps.",
+    outLabel:"Our project plan", empty:"A campaign for our brand.",
+    perfect:"Everything the brief asks for is in. That's a plan the panel can grade on all five criteria.",
+    partial:"Each gap is a mark the panel can't give you.",
+    chips:[
+      {k:"2+ platforms", text:"Platforms: at least two, each with tactics fitted to its audience and tools.", good:true, tip:"The brief asks for at least two platforms."},
+      {k:"AI component", text:"AI component: at least one, with the human decisions around it explained.", good:true, tip:"Every group must show one, and explain the human calls."},
+      {k:"SMART objective", text:"Objective: 1,500 qualified leads at under S$40 each within 3 months.", good:true, tip:"The deck's own SMART example."},
+      {k:"$100k split", text:"Budget: $100,000 split by platform and funnel stage, with sourced benchmark costs.", good:true, tip:"Show the split and where the CPM/CPC/CPA came from."},
+      {k:"Test reserve", text:"Reserve: 10–15% held back for test-and-learn.", good:true, tip:"Required in the media plan."},
+      {k:"3-month timeline", text:"Timeline: a 3-month rollout plan.", good:true, tip:"Part of the proposal."},
+      {k:"KPIs per stage", text:"KPIs: reach, CTR, CPA/ROAS and conversions per funnel stage, plus how we'll prove we caused them.", good:true, tip:"Measurement must cover the funnel and causation."},
+      {k:"AI disclosure", text:"Disclosure: one slide of AI tools, key prompts and what we changed by hand.", good:true, tip:"Required, and AI mock-ups must be labelled."},
+      {k:"One platform", text:"Platform: Instagram only.", good:false, tip:"Fewer than the two platforms required."},
+      {k:"Unlabelled AI", text:"Mock-ups: AI-generated, no label.", good:false, tip:"Label anything AI-generated and name the tool."},
+      {k:"Likes only", text:"Success: count the likes.", good:false, tip:"Likes alone don't cover the funnel or prove impact."},
+      {k:"All in week 1", text:"Budget: spend it all in week one.", good:false, tip:"No reserve, no learning, and the plan must run 3 months."}
+    ]},
+
+  s4_roles:{type:"classify", title:"Who's on the team?", blurb:"Session 4's five media-team roles. Match each job to the person who owns it.", rounds:8,
+    options:["Strategist","Buyer","Trader","Analyst","Manager"], items:[
+    {q:"Decides the best channels, budgets and tactics for the client's objective.", a:"Strategist", why:"The strategist develops the media strategy."},
+    {q:"Uses AI for scenario planning but still owns the objective and the big idea.", a:"Strategist", why:"How AI changes the strategist's role."},
+    {q:"Negotiates placements across channels for the best value and reach.", a:"Buyer", why:"The buyer negotiates and purchases ad placements."},
+    {q:"Sets goals, budgets and guardrails for Advantage+ instead of bidding by hand.", a:"Buyer", why:"Session 4 grouped buyer and trader here; buying is the closer fit for setting campaign goals."},
+    {q:"Optimises programmatic bids and placements in real time.", a:"Trader", why:"The trader manages automated programmatic buying."},
+    {q:"Runs the automated platforms where impressions are bought auction by auction.", a:"Trader", why:"Programmatic trading is the trader's domain."},
+    {q:"Tracks campaign performance and recommends optimisations.", a:"Analyst", why:"The analyst turns results into insight."},
+    {q:"Moves from platform reports to an incrementality test and a Meridian mix model.", a:"Analyst", why:"How AI changes the analyst's role."},
+    {q:"Keeps timelines, budgets and deliverables on track across teams.", a:"Manager", why:"The manager oversees execution and stakeholders."},
+    {q:"Writes the rules on where AI may be used, disclosure and brand safety.", a:"Manager", why:"AI governance is the manager's new job."}
+  ]},
+
+  s4_brief:{type:"order", title:"From brief to live campaign", blurb:"Put Session 4's brief process in order, from the client's email to a campaign being optimised.",
+    steps:[
+      "Client sends the completed brief to the media team",
+      "Brief dissection: the team analyses the details",
+      "Brief questioning: the team lists gaps and context questions",
+      "Brief discovery: a call with the client to go through the questions",
+      "Media planning: the team starts the strategy and plan",
+      "Research and insights on audience, market and competitors",
+      "Strategy development: channels, budgets and the customer journey",
+      "Launch, then optimise and measure in real time"
+    ]},
+
+  s4_wwf:{type:"higherlower", title:"The WWF numbers", blurb:"Figures from the WWF Together Possible @ Work proposal and the B2B slides. Tap the higher one.", rounds:6, items:[
+    {q:"Planned cost per lead", a:["LinkedIn lead form","$60",60], b:["Meta lead form","$10",10], src:"WWF 12-week media plan"},
+    {q:"Planned cost per lead", a:["Meta lead form","$10",10], b:["Google Search","$8",8], src:"WWF 12-week media plan"},
+    {q:"Planned leads", a:["Meta lead form","701",701], b:["Google Search","150",150], src:"WWF 12-week media plan"},
+    {q:"Planned budget", a:["Meta lead form","$7,017",7017], b:["Meta traffic","$5,500",5500], src:"WWF 12-week media plan"},
+    {q:"Planned cost per unit on LinkedIn", a:["Lead form, per lead","$60",60], b:["Conversation ad, per chat","$50",50], src:"WWF 12-week media plan"},
+    {q:"Employees who say…", a:["They'd earn less if the job helped society","44%",44], b:["They'd rather be unemployed than unhappy","41%",41], src:"Randstad Workmonitor 2022, in the WWF proposal"},
+    {q:"B2B buying in 2026", a:["Buyers using AI chatbots","94%",94], b:["Cycles where procurement decides","53%",53], src:"Forrester 2026"},
+    {q:"People involved in a typical B2B purchase", a:["Internal stakeholders","13",13], b:["External influencers","9",9], src:"Forrester 2026"}
+  ]},
+
+  yp_chain:{type:"order", title:"Assemble the AI team", blurb:"The live demo chained saved skills, one after another. Put them in the order the work flows.",
+    steps:[
+      "Brief Builder drafts a brief from the latest emailed request",
+      "Brief Validator scores it against a checklist",
+      "Researcher Strategist finds the insight and differentiation",
+      "Messaging Hierarchy Builder sets the promise and supporting messages",
+      "KV Concept Builder turns the big idea into key-visual concepts",
+      "Creative Review Scorer judges the finished creative",
+      "Governance Compliance Check tests it against the advertising code"
+    ]},
+
+  yp_skill:{type:"classify", title:"Which skill does it?", blurb:"Seven skills made up the demo's AI marketing team. Match each job to the skill that did it.", rounds:7,
+    options:["Brief Builder","Brief Validator","Researcher Strategist","Messaging Hierarchy","KV Concept Builder","Creative Review Scorer","Compliance Check"], items:[
+    {q:"Drafts a structured brief from objectives, audience and project context.", a:"Brief Builder", why:"It also ran on a schedule, reading the brief straight from Gmail."},
+    {q:"Leaves anything the email didn't say marked [to confirm].", a:"Brief Builder", why:"Its draft ended with 11 open questions rather than invented figures."},
+    {q:"Scores a brief on objective, audience, message, channels and success measures.", a:"Brief Validator", why:"Its three fixes shaped the revised brief."},
+    {q:"Pulls 90 days of competitors' social posts to find white space.", a:"Researcher Strategist", why:"It used the SOMIN connector plus web search."},
+    {q:"Writes the hidden motivation: “a bag she never has to justify”.", a:"Researcher Strategist", why:"The insight came out of the research and strategy report."},
+    {q:"Builds the core promise, supporting messages and proof points.", a:"Messaging Hierarchy", why:"Version 2 put the big idea first, then applied it per platform."},
+    {q:"Describes three key visuals in words: Held, Reassembled and Years.", a:"KV Concept Builder", why:"It recommended Held, the concept with no unverified claim."},
+    {q:"Rates a Story 5.7/10 through BBH, Ogilvy and McCann lenses.", a:"Creative Review Scorer", why:"It scored each execution against the approved brief."},
+    {q:"Checks copy against the Singapore Code of Advertising Practice.", a:"Compliance Check", why:"The governance skill in the team."}
+  ]},
+
+  yp_guard:{type:"classify", title:"Would your AI teammate do it?", blurb:"Requests like the ones in the demo. Decide whether the AI should go ahead, flag it first, or refuse.", rounds:8,
+    options:["Go ahead","Flag it first","Won't do it"], items:[
+    {q:"Draft the brief from the latest “Marketing Brief” email.", a:"Go ahead", why:"A clear, low-risk task. It also noted an older email it chose not to use."},
+    {q:"The brief has no budget split. Fill one in so the document looks finished.", a:"Flag it first", why:"It marked gaps [to confirm] and invented no budget figures."},
+    {q:"Put the real brand ambassador's face on the generated model.", a:"Won't do it", why:"A realistic image of a real person in what looks like a real campaign. A training label doesn't change that."},
+    {q:"Swap in the brand's own product photo so the scene reads as a genuine ad.", a:"Won't do it", why:"The brief said not to imply an official advertisement, and it would drop the fictional product."},
+    {q:"Aim for 1 million unique users in Singapore's affluent luxury audience.", a:"Flag it first", why:"It flagged the target as too high and suggested restating it as a share of the audience."},
+    {q:"State the bag's recycled-material percentage in the caption.", a:"Flag it first", why:"The claims weren't verified, so every one stayed [to verify]."},
+    {q:"Add LinkedIn and YouTube, which the brief doesn't include.", a:"Flag it first", why:"It wrote them as proposals needing a decision and budget."},
+    {q:"Regenerate the desert image with a different, invented model.", a:"Go ahead", why:"That was the alternative it offered."},
+    {q:"Score the Story and feed post against the brief.", a:"Go ahead", why:"Exactly what the Creative Review Scorer is for."}
+  ]},
+
+  yp_gap:{type:"higherlower", title:"Mind the gap", blurb:"The guest session's numbers on AI readiness, plus two from the live demo. Tap the higher one.", rounds:7, items:[
+    {q:"CMOs who…", a:["Say they're transforming end to end with AI","96%",96], b:["Mainly use GenAI as a task helper","42%",42], src:"Session 4 guest slides"},
+    {q:"CMOs who…", a:["Mainly use GenAI as a task helper","42%",42], b:["Run campaigns with connected agents","~8%",8], src:"Session 4 guest slides"},
+    {q:"Marketers who…", a:["Say lack of training holds them back","62%",62], b:["Get formal AI training at work","32%",32], src:"Session 4 guest slides"},
+    {q:"Singapore workers who…", a:["Use AI at work","86%",86], b:["Had AI training in the past year","37%",37], src:"Session 4 guest slides"},
+    {q:"AI adoption in Singapore, 2025", a:["Large firms","70.4%",70.4], b:["SMEs","23.4%",23.4], src:"Session 4 guest slides"},
+    {q:"Share of the impact people get from AI explained by…", a:["Culture, managers and talent practices","67%",67], b:["Individual skills","32%",32], src:"Session 4 guest slides"},
+    {q:"Skills marketers need most", a:["Checking AI output","50%",50], b:["Critical thinking","46%",46], src:"Session 4 guest slides"},
+    {q:"Companies or CMOs who…", a:["Have processes and skills to scale AI","30%",30], b:["Have redesigned any workflow","21%",21], src:"Session 4 guest slides"},
+    {q:"Share of posts on travel and exploration, last 90 days", a:["The demo's luxury brand","38.1%",38.1], b:["Its competitor set","11.1%",11.1], src:"SOMIN data in the live demo"}
+  ]},
+
+  s5_stages:{type:"order", title:"Plan in stages", blurb:"Session 5's six stages of media planning. Put them in order.",
+    steps:["Business context","Audience insights","Channel decisions","Investment decisions","Measurement plan","Media plan"]},
+
+  s5_size:{type:"classify", title:"Insight or size?", blurb:"Is this tool or question about understanding the audience, or counting it?", rounds:8,
+    options:["Audience insight","Audience size"], items:[
+    {q:"GWI consumer research on attitudes and trends", a:"Audience insight", why:"A subscription research tool: qualitative understanding."},
+    {q:"Google Analytics 4 segments of who visits your site", a:"Audience insight", why:"Site-side analytics show who your visitors are and what they like."},
+    {q:"Meta's estimated audience size in Ads Manager", a:"Audience size", why:"Sizing comes from the platforms where you'll actually buy."},
+    {q:"LinkedIn Campaign Manager's audience forecast", a:"Audience size", why:"It shows estimated members as you build, by job title and industry."},
+    {q:"Google Keyword Planner search volume forecasts", a:"Audience size", why:"It forecasts searches, clicks and costs."},
+    {q:"TikTok's count of accounts that saw ads in the last 30 days", a:"Audience size", why:"Audience Insights counts accounts, not people."},
+    {q:"Reading a skincare subreddit for pain points", a:"Audience insight", why:"Reddit is a free source of unfiltered opinion."},
+    {q:"Meltwater summaries of social conversation", a:"Audience insight", why:"Listening tools explain what people think."},
+    {q:"Asking “How do they research products online?”", a:"Audience insight", why:"One of the questions that unlock insight."},
+    {q:"Google Reach Planner's weekly frequency benchmarks", a:"Audience size", why:"A planning tool for reach and frequency."}
+  ]},
+
+  s5_quality:{type:"classify", title:"Customer quality", blurb:"Session 5's four customer types. Sort each shopper.", rounds:6,
+    options:["Star","Vulnerable","Free rider","Lost cause"], items:[
+    {q:"Shops several times a year at full price and is a loyalty member.", a:"Star", why:"High value from the brand, high value back."},
+    {q:"Loves the products, recommends them and keeps buying new launches.", a:"Star", why:"Value flows both ways."},
+    {q:"Only buys during sales, and loves free samples and birthday gifts.", a:"Free rider", why:"Very happy, not very profitable."},
+    {q:"Keeps the brand in mind but always waits for a deal.", a:"Free rider", why:"Price-sensitive buyers are cheap to win and hard to profit from."},
+    {q:"Spends a lot, but feels the brand gives them little in return.", a:"Vulnerable", why:"Valuable to the company, at risk of leaving."},
+    {q:"A big account whose needs the brand isn't really meeting.", a:"Vulnerable", why:"High value to you, low value to them."},
+    {q:"Rarely engages, buys little, and gets little from the product.", a:"Lost cause", why:"Little value either way."},
+    {q:"Bought once with a big discount code and never returned.", a:"Lost cause", why:"A low acquisition cost doesn't make a valuable customer."}
+  ]},
+
+  s5_myth:{type:"classify", title:"Fact or myth?", blurb:"Claims about AI and audience tools from Session 5. Which hold up?", rounds:8,
+    options:["Fact","Myth"], items:[
+    {q:"Synthetic respondents should make up no more than 10–20% of a sample.", a:"Fact", why:"The deck's rule of thumb: explore with AI, validate with real data."},
+    {q:"AI twins of consumers reproduce the spread of real opinion accurately.", a:"Myth", why:"Pew found them flattening opinion: 98% vs 42% on one question."},
+    {q:"Deep research agents cite sources, so there's no need to check them.", a:"Myth", why:"Always check the sources they cite."},
+    {q:"With Meta's Advantage+ audience, age and interests are only suggestions.", a:"Fact", why:"The AI can reach beyond them."},
+    {q:"Meta still lets you exclude detailed-targeting interests.", a:"Myth", why:"Those exclusions were removed in 2025."},
+    {q:"LinkedIn needs at least 300 members to serve, and recommends 50,000+.", a:"Fact", why:"And location is required, set first."},
+    {q:"TikTok Audience Insights counts people, including under-18s.", a:"Myth", why:"It counts accounts, with no under-18s."},
+    {q:"Facebook IQ is now Meta Foresight.", a:"Fact", why:"One of the renamed tools."},
+    {q:"Synthetic research gets willingness-to-pay about right.", a:"Myth", why:"Strat7 found it 16% too high, with trends right only 47% of the time."},
+    {q:"Aveeno cut a strategy brief from 30 days to 3 with synthetic audiences.", a:"Fact", why:"The speed is real. The accuracy needs checking."}
+  ]},
+
+  li_format:{type:"classify", title:"Pick the LinkedIn format", blurb:"Four LinkedIn tools from the course. Which one fits each job?", rounds:7,
+    options:["Thought Leader Ads","Lead Gen Forms","Conversation Ads","Accelerate"], items:[
+    {q:"Promote the CEO's post on industry trends as an ad.", a:"Thought Leader Ads", why:"They put executives' and employees' posts in front of a paid audience."},
+    {q:"Boost an employee's story about a project they delivered.", a:"Thought Leader Ads", why:"Employee voices count for more now that buyers double-check AI answers with people."},
+    {q:"Collect sign-ups with a form pre-filled from the member's profile.", a:"Lead Gen Forms", why:"Leads without anyone leaving LinkedIn."},
+    {q:"Offer WWF's engagement catalogue as a download in exchange for contact details.", a:"Lead Gen Forms", why:"WWF's plan used a LinkedIn lead form at $60 per lead."},
+    {q:"“Hi Mei Dee! I'm Kira from WWF…” with buttons to download or learn more.", a:"Conversation Ads", why:"WWF's sponsored message, planned at $50 per conversation."},
+    {q:"Invite prospects to RSVP for a free webinar in a sponsored message.", a:"Conversation Ads", why:"WWF's second message used an RSVP button."},
+    {q:"Let AI build the campaign and keep optimising it.", a:"Accelerate", why:"LinkedIn's AI campaign builder."},
+    {q:"Give LinkedIn a goal and let it handle targeting and creative tweaks.", a:"Accelerate", why:"Accelerate is LinkedIn's version of Advantage+ or Performance Max."}
+  ]},
+
+  li_geo:{type:"classify", title:"SEO, GEO or paid?", blurb:"Search is turning into answers. Sort each tactic.", rounds:8,
+    options:["SEO","GEO","Paid"], items:[
+    {q:"Vietnam Airlines optimises its pages for “cheap flights to Da Nang”.", a:"SEO", why:"Ranking organically in search results."},
+    {q:"Publishing blog posts that target “video production tips”.", a:"SEO", why:"Session 3's organic search example."},
+    {q:"Lazada bids on “best Ramadan discounts” in Indonesia.", a:"Paid", why:"Paid search captures intent at the moment of need."},
+    {q:"Running ChatGPT Ads in Singapore.", a:"Paid", why:"Live since September 2026."},
+    {q:"Buying ads that appear inside Google AI Overviews.", a:"Paid", why:"Live in Singapore since December 2025."},
+    {q:"Asking five AI assistants your customer's question to see who gets recommended.", a:"GEO", why:"The project's GEO check."},
+    {q:"Writing clear answers and FAQs so AI tools name your brand.", a:"GEO", why:"Generative engine optimisation."},
+    {q:"Tracking the share of AI answers that mention your brand.", a:"GEO", why:"An AI visibility metric."},
+    {q:"Structuring travel guides so AI answer engines quote them.", a:"GEO", why:"Session 1's Cathay Pacific example."},
+    {q:"A skippable YouTube ad aimed at project managers.", a:"Paid", why:"Session 3's paid example."}
+  ]},
+
+  li_build:{type:"prompt", title:"Set up the campaign", blurb:"Build WWF's LinkedIn campaign in Campaign Manager. Switch on the right settings. Some are traps.",
+    outLabel:"Campaign Manager setup", empty:"Campaign: not set up yet.",
+    perfect:"That setup would serve, reach the right people and be judged on what matters.",
+    partial:"Each missing setting is money LinkedIn spends on guesswork.",
+    chips:[
+      {k:"Location first", text:"Location: Singapore, set first.", good:true, tip:"Location is required and comes first."},
+      {k:"Job titles", text:"Job titles: CXOs, senior HR and people-operations leaders.", good:true, tip:"WWF's decision-makers."},
+      {k:"Member interest", text:"Member interest: sustainable business.", good:true, tip:"From WWF's targeting."},
+      {k:"50,000+ members", text:"Audience size: 50,000+ members.", good:true, tip:"LinkedIn's recommended size."},
+      {k:"Thought Leader Ads", text:"Awareness: Thought Leader Ads from the programme's leaders.", good:true, tip:"Credibility for a B2B audience."},
+      {k:"Lead Gen Form", text:"Conversion: Lead Gen Form offering the catalogue.", good:true, tip:"Leads without leaving LinkedIn."},
+      {k:"Test vs Meta", text:"Budget: test $3,000 against Meta, compare cost per lead, move the rest to the winner.", good:true, tip:"The WWF plan's optimisation rule."},
+      {k:"250 members", text:"Audience: 250 HR managers at one company.", good:false, tip:"Below the 300-member minimum, so it won't serve."},
+      {k:"Skip location", text:"Location: decide later.", good:false, tip:"Location is required."},
+      {k:"Everyone 18–65", text:"Targeting: everyone aged 18–65.", good:false, tip:"Throws away LinkedIn's professional targeting."},
+      {k:"Judge on likes", text:"Success: likes on the post.", good:false, tip:"A lead-gen plan is judged on cost per qualified lead."}
+    ]},
+
+  li_b2b:{type:"higherlower", title:"B2B by numbers", blurb:"The figures behind LinkedIn's B2B pitch, from across the course. Tap the higher one.", rounds:5, items:[
+    {q:"B2B buyers who…", a:["Use AI chatbots during the journey","94%",94], b:["Trial a product before committing","60%+",60], src:"Forrester 2026; 6sense 2025"},
+    {q:"In B2B buying, the share of…", a:["Buyers who use trials","60%+",60], b:["Cycles where procurement decides","53%",53], src:"Forrester 2026; 6sense 2025"},
+    {q:"People in a typical B2B purchase", a:["Internal stakeholders","13",13], b:["External influencers","9",9], src:"Forrester 2026"},
+    {q:"In Singapore", a:["ChatGPT's share of AI referrals","75%+",75], b:["People using ChatGPT monthly","~33%",33], src:"DataReportal Digital 2026 Singapore"},
+    {q:"WWF plan: planned leads", a:["Google Search","150",150], b:["LinkedIn lead form","50",50], src:"WWF 12-week media plan"},
+    {q:"LinkedIn audience size", a:["Recommended","50,000+",50000], b:["Minimum to serve","300",300], src:"LinkedIn Help, via Session 5"}
+  ]}
+};
+
+var AHEAD = [
+  {n:"Session 6", t:"China-based vs global platforms", d:"WeChat, Weibo, Douyin and Xiaohongshu compared with global platforms, and how culture, regulation and technology shape platform choice.", g:"Which platform, which market: route a brief to the right platform."},
+  {n:"Session 7", t:"Measurement and reporting", d:"Key metrics, tools and techniques for judging campaign success and optimising the next one. Also the suggested project check-in.", g:"KPI picker: pair each objective with the metric that proves it."},
+  {n:"Session 8", t:"Google: YouTube and Gemini", d:"Google's value for brand building through YouTube and Gemini: content, reach and engagement.", g:"Format quiz: YouTube ad formats and when to use each."},
+  {n:"Session 9", t:"Multi-platform cases and Pinterest", d:"Case studies of campaigns that hit their targets across platforms, plus Pinterest ads, performance and content.", g:"Case detective: work out which platform mix drove each result."},
+  {n:"Session 10", t:"Final project pitches", d:"Each group pitches its omni-channel campaign in 20 minutes, with 5 minutes of Q&A, on 11 or 16 December.", g:"Pitch rehearsal: a timed checklist of the five grading criteria."}
+];
+
+var ICON = {classify:"i-sort", higherlower:"i-hl", order:"i-order", prompt:"i-build"};
+var OK_LINES = ["Smooth.","Textbook.","Clean manoeuvre.","Mirror, signal, nailed it.","Lovely control.","Spot on."];
+var NO_LINES = ["Minor fault.","Check your mirrors.","Stalled that one.","Not quite."];
+function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
+var reduceMotion = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- Scores (this browser only) ---------- */
+var KEY = "tdrl-best-v1";
+var best = {};
+try { best = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e){ best = {}; }
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(best)); } catch(e){} }
+
+function maxFor(g){
+  if(g.type==="classify"||g.type==="higherlower") return Math.min(g.rounds, g.items.length)*10;
+  if(g.type==="order") return g.steps.length*10;
+  if(g.type==="prompt") return g.chips.filter(function(c){return c.good;}).length*10;
+  return 0;
+}
+function sumMax(ids){ return ids.reduce(function(s,k){return s+maxFor(GAMES[k]);},0); }
+function sumBest(ids){ return ids.reduce(function(s,k){return s+(best[k]||0);},0); }
+
+var TAB_GAMES = {};
+TABS.forEach(function(t){
+  var p = document.getElementById("p-"+t.id);
+  TAB_GAMES[t.id] = p ? Array.prototype.map.call(p.querySelectorAll(".game[data-game]"), function(el){return el.dataset.game;}) : [];
+});
+var STAMP_TABS = TABS.filter(function(t){ return TAB_GAMES[t.id].length; });
+var ALL = Object.keys(GAMES).filter(function(k){ return document.querySelector('.game[data-game="'+k+'"]'); });
+var MAX = sumMax(ALL);
+function levelOf(pct){ return pct>=90?"Advanced driver":pct>=60?"Full licence":pct>=25?"Provisional":"L-plate"; }
+function earned(tid){ var ids=TAB_GAMES[tid]; var m=sumMax(ids); return m>0 && sumBest(ids)/m>=0.6; }
+
+var lastTotal = null, lastStamps = {};
+function updateLicence(){
+  var t = sumBest(ALL), pct = MAX? Math.round(t/MAX*100) : 0, lv = levelOf(pct);
+  var odo = document.getElementById("odo");
+  odo.innerHTML = String(t).padStart(4,"0").split("").map(function(d){return "<i>"+d+"</i>";}).join("")+"<em>/ "+MAX+"</em>";
+  if(lastTotal!==null && t!==lastTotal){ odo.classList.remove("bump"); void odo.offsetWidth; odo.classList.add("bump"); }
+  lastTotal = t;
+  document.getElementById("level").textContent = lv;
+  document.getElementById("plate").textContent = pct>=60 ? "P" : "L";
+  var st = document.getElementById("stamps");
+  st.innerHTML = STAMP_TABS.map(function(tb){
+    var on = earned(tb.id), cls = "stamp"+(on?" on"+(tb.kind==="guest"?" g":""):"")+(on && lastStamps[tb.id]===false?" pop":"");
+    return '<span class="'+cls+'" title="'+tb.code+' '+(on?"stamped":"not yet")+'">'+tb.code+'</span>';
+  }).join("");
+  STAMP_TABS.forEach(function(tb){ lastStamps[tb.id]=earned(tb.id); });
+  var n = STAMP_TABS.filter(function(tb){return earned(tb.id);}).length;
+  document.getElementById("licText").textContent = t+" of "+MAX+" points, "+lv+", "+n+" of "+STAMP_TABS.length+" stamps";
+  document.querySelectorAll("#scale div").forEach(function(d){
+    var min = +d.dataset.min, next = d.nextElementSibling ? +d.nextElementSibling.dataset.min : 101;
+    d.classList.toggle("on", pct>=min && pct<next);
+  });
+  document.querySelectorAll("[data-best]").forEach(function(el){
+    var id = el.dataset.best; el.innerHTML = "Best <b>"+(best[id]||0)+"</b> / "+maxFor(GAMES[id]);
+  });
+  document.querySelectorAll(".sec-head [data-count]").forEach(function(el){
+    var ids = el.dataset.count.split(",");
+    el.innerHTML = ids.length+" games · <b>"+sumBest(ids)+"</b> / "+sumMax(ids)+" points";
+  });
+}
+function record(id, score){
+  if(score > (best[id]||0)){ best[id]=score; save(); }
+  updateLicence();
+}
+
+/* ---------- Helpers ---------- */
+function shuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function bar(i,n){ return '<div class="g-bar" aria-hidden="true"><i style="left:calc('+(i/n*100)+'% - '+(i/n*20)+'px)"></i></div>'; }
+
+function confetti(){
+  if(reduceMotion) return;
+  var cs = getComputedStyle(document.documentElement);
+  var cols = ["--yellow","--green","--blue","--red","--orange"].map(function(v){return cs.getPropertyValue(v).trim();});
+  var c = document.createElement("canvas"), dpr = window.devicePixelRatio||1;
+  c.style.cssText = "position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50";
+  c.width = innerWidth*dpr; c.height = innerHeight*dpr; document.body.appendChild(c);
+  var x = c.getContext("2d"); x.scale(dpr,dpr);
+  var P = []; for(var i=0;i<140;i++){ P.push({x:innerWidth/2+(Math.random()-.5)*160, y:innerHeight*.35, vx:(Math.random()-.5)*11, vy:-Math.random()*11-4, r:Math.random()*6.28, vr:(Math.random()-.5)*.4, w:6+Math.random()*7, h:4+Math.random()*5, c:cols[i%cols.length]}); }
+  var t0 = performance.now();
+  (function tick(now){
+    var el = now - t0; x.clearRect(0,0,innerWidth,innerHeight);
+    P.forEach(function(p){ p.vy+=.32; p.x+=p.vx; p.y+=p.vy; p.r+=p.vr; x.save(); x.translate(p.x,p.y); x.rotate(p.r); x.fillStyle=p.c; x.globalAlpha=Math.max(0,1-el/1900); x.fillRect(-p.w/2,-p.h/2,p.w,p.h); x.restore(); });
+    if(el<1900) requestAnimationFrame(tick); else c.remove();
+  })(t0);
+}
+
+function endScreen(body, score, max, again){
+  var pct = Math.round(score/max*100), pass = pct>=70;
+  var msg = pct===100?"Clean run. No faults recorded.":pct>=70?"A pass. Replay to clear the minor faults.":pct>=40?"Close. Read the reasons and take it again.":"Worth another lap with the notes open.";
+  body.innerHTML = '<div class="end"><span class="verdict pop '+(pass?'pass':'retake')+'">'+(pass?'PASS':'RETAKE')+'</span><span class="eyebrow">Test complete</span><div class="big">'+score+' / '+max+'</div><p><span class="exam '+(pass?'ok':'no')+'">Examiner:</span>'+msg+'</p><div class="g-actions"><button class="btn">Drive it again</button></div></div>';
+  var b = body.querySelector(".btn"); b.onclick = again; b.focus({preventScroll:true});
+  if(pct===100) confetti();
+}
+function feedback(ok, extra){ return '<span class="exam '+(ok?'ok':'no')+'">'+(ok?pick(OK_LINES):pick(NO_LINES))+'</span> '+extra; }
+
+/* ---------- Engine: sort it ---------- */
+function mountClassify(body, id, g){
+  var st;
+  function start(){ st = {items:shuffle(g.items).slice(0,g.rounds), i:0, score:0}; render(); }
+  function render(){
+    if(st.i>=st.items.length){ record(id, st.score); return endScreen(body, st.score, st.items.length*10, start); }
+    var it = st.items[st.i];
+    body.innerHTML =
+      '<div class="g-status"><span>Card '+(st.i+1)+' of '+st.items.length+'</span><span>Score '+st.score+'</span></div>'+ bar(st.i, st.items.length)+
+      '<p class="g-q">'+esc(it.q)+'</p>'+
+      '<div class="g-opts'+(g.options.length<=3?' few':'')+'">'+g.options.map(function(o,k){return '<button class="opt" data-k="'+k+'">'+esc(o)+'</button>';}).join("")+'</div>'+
+      '<div class="g-fb" hidden></div>';
+    body.querySelectorAll(".opt").forEach(function(b){ b.onclick=function(){ answer(+b.dataset.k); }; });
+  }
+  function answer(k){
+    var it = st.items[st.i], right = g.options.indexOf(it.a), ok = k===right;
+    body.querySelectorAll(".opt").forEach(function(b,i){ b.disabled=true; if(i===right) b.classList.add("is-right"); if(i===k && !ok) b.classList.add("is-wrong"); });
+    if(ok) st.score+=10;
+    var fb = body.querySelector(".g-fb");
+    fb.innerHTML = '<p>'+feedback(ok, (ok?'':'It’s <strong>'+esc(it.a)+'</strong>. ')+esc(it.why||""))+'</p>'+
+      '<div class="g-actions"><button class="btn">'+(st.i+1<st.items.length?'Next card':'See result')+'</button></div>';
+    fb.hidden=false;
+    var nb = fb.querySelector(".btn"); nb.onclick=function(){ st.i++; render(); }; nb.focus({preventScroll:true});
+  }
+  start();
+}
+
+/* ---------- Engine: higher or lower ---------- */
+function mountHL(body, id, g){
+  var st;
+  function start(){ st={items:shuffle(g.items).slice(0,g.rounds).map(function(it){ return Math.random()<.5?{q:it.q,src:it.src,l:it.a,r:it.b}:{q:it.q,src:it.src,l:it.b,r:it.a}; }), i:0, score:0}; render(); }
+  function card(side, x){ return '<button class="opt" data-s="'+side+'"><span class="name">'+esc(x[0])+'</span><span class="val" hidden>'+esc(x[1])+'</span></button>'; }
+  function render(){
+    if(st.i>=st.items.length){ record(id, st.score); return endScreen(body, st.score, st.items.length*10, start); }
+    var it = st.items[st.i];
+    body.innerHTML =
+      '<div class="g-status"><span>Round '+(st.i+1)+' of '+st.items.length+'</span><span>Score '+st.score+'</span></div>'+ bar(st.i, st.items.length)+
+      '<p class="g-q">Which is higher?<small>'+esc(it.q)+'</small></p>'+
+      '<div class="hl">'+card("l",it.l)+'<span class="vs" aria-hidden="true">VS</span>'+card("r",it.r)+'</div>'+
+      '<div class="g-fb" hidden></div>';
+    body.querySelectorAll(".opt").forEach(function(b){ b.onclick=function(){ answer(b.dataset.s); }; });
+  }
+  function answer(s){
+    var it = st.items[st.i], win = it.l[2]>=it.r[2] ? "l" : "r", ok = s===win;
+    body.querySelectorAll(".opt").forEach(function(b){
+      b.disabled=true; b.querySelector(".val").hidden=false;
+      if(b.dataset.s===win) b.classList.add("is-right"); else if(b.dataset.s===s) b.classList.add("is-wrong");
+    });
+    if(ok) st.score+=10;
+    var fb = body.querySelector(".g-fb");
+    fb.innerHTML = '<p>'+feedback(ok, '<span class="src">Source: '+esc(it.src)+'</span>')+'</p>'+
+      '<div class="g-actions"><button class="btn">'+(st.i+1<st.items.length?'Next round':'See result')+'</button></div>';
+    fb.hidden=false;
+    var nb = fb.querySelector(".btn"); nb.onclick=function(){ st.i++; render(); }; nb.focus({preventScroll:true});
+  }
+  start();
+}
+
+/* ---------- Engine: put it in order ---------- */
+function mountOrder(body, id, g){
+  var cur, locked;
+  function start(){
+    do { cur = shuffle(g.steps.map(function(_,i){return i;})); } while(cur.every(function(v,i){return v===i;}));
+    locked=false; render();
+  }
+  function render(){
+    body.innerHTML = '<ol class="order">'+cur.map(function(v,pos){
+      var cls = locked ? (v===pos?' class="is-right"':' class="is-wrong"') : '';
+      var tail = locked
+        ? (v===pos ? '<span class="fix">✓ in place</span>' : '<span class="fix">goes '+(v+1)+'</span>')
+        : '<span class="mv"><button data-u="'+pos+'" aria-label="Move up" '+(pos===0?'disabled':'')+'>▲</button><button data-d="'+pos+'" aria-label="Move down" '+(pos===cur.length-1?'disabled':'')+'>▼</button></span>';
+      return '<li'+cls+'><span class="n">'+String(pos+1).padStart(2,"0")+'</span><span class="t">'+esc(g.steps[v])+'</span>'+tail+'</li>';
+    }).join("")+'</ol>'+
+    (locked ? '' : '<div class="g-actions"><button class="btn" id="'+id+'-chk">Check my order</button></div>')+
+    '<div class="g-fb" hidden></div>';
+    body.querySelectorAll("[data-u]").forEach(function(b){ b.onclick=function(){ move(+b.dataset.u,-1); }; });
+    body.querySelectorAll("[data-d]").forEach(function(b){ b.onclick=function(){ move(+b.dataset.d,1); }; });
+    var c = document.getElementById(id+"-chk"); if(c) c.onclick=check;
+  }
+  function move(p, dir){
+    var q=p+dir, t=cur[p]; cur[p]=cur[q]; cur[q]=t; render();
+    var sel = body.querySelector(dir<0?'[data-u="'+q+'"]':'[data-d="'+q+'"]');
+    if(sel && !sel.disabled) sel.focus({preventScroll:true});
+  }
+  function check(){
+    locked=true;
+    var score = cur.reduce(function(s,v,i){return s+(v===i?10:0);},0), max = g.steps.length*10;
+    record(id, score); render();
+    var fb = body.querySelector(".g-fb");
+    fb.innerHTML = '<p>'+(score===max ? feedback(true,'Every step in place: '+score+' / '+max+'.') : feedback(false,'<strong>'+score+' / '+max+'.</strong> Red rows show where each step should go.'))+'</p>'+
+      '<div class="g-actions"><button class="btn">New shuffle</button></div>';
+    fb.hidden=false;
+    var b = fb.querySelector(".btn"); b.onclick=start; b.focus({preventScroll:true});
+    if(score===max) confetti();
+  }
+  start();
+}
+
+/* ---------- Engine: build it ---------- */
+function mountPrompt(body, id, g){
+  var on = {};
+  var outLabel = g.outLabel || "Your prompt", empty = g.empty || "Create a website for my course.";
+  var perfect = g.perfect || "That's the structure the workshop recommended. A model has everything it needs to build the right site.";
+  var partial = g.partial || "Each missing ingredient is a decision the model has to guess.";
+  body.innerHTML =
+    '<div class="chips">'+g.chips.map(function(c,i){return '<button class="chip" aria-pressed="false" data-i="'+i+'">'+esc(c.k)+'</button>';}).join("")+'</div>'+
+    '<div class="out-wrap"><span class="eyebrow">'+esc(outLabel)+'</span><pre class="prompt-out" id="'+id+'-out"></pre></div>'+
+    '<div class="g-actions"><button class="btn" id="'+id+'-grade">Grade it</button><button class="btn ghost" id="'+id+'-clr">Clear</button></div>'+
+    '<div class="g-fb" hidden></div>';
+  var out = document.getElementById(id+"-out");
+  function draw(){
+    var lines = g.chips.filter(function(_,i){return on[i];}).map(function(c){return c.text;});
+    out.textContent = lines.length ? lines.join("\n") : empty;
+    body.querySelector(".g-fb").hidden = true;
+  }
+  body.querySelectorAll(".chip").forEach(function(b){
+    b.onclick=function(){ var i=+b.dataset.i; on[i]=!on[i]; b.setAttribute("aria-pressed", on[i]?"true":"false"); draw(); };
+  });
+  document.getElementById(id+"-clr").onclick=function(){ on={}; body.querySelectorAll(".chip").forEach(function(b){b.setAttribute("aria-pressed","false");}); draw(); };
+  document.getElementById(id+"-grade").onclick=function(){
+    var good=0, traps=[], miss=[];
+    g.chips.forEach(function(c,i){ if(c.good){ if(on[i]) good++; else miss.push(c); } else if(on[i]) traps.push(c); });
+    var score = Math.max(0, good*10 - traps.length*5), max = maxFor(g);
+    record(id, score);
+    var fb = body.querySelector(".g-fb");
+    var html = '<p>'+feedback(score===max, '<strong>'+score+' / '+max+'.</strong> '+(score===max?perfect:partial))+'</p>';
+    if(miss.length) html += '<ul class="missing">'+miss.map(function(c){return '<li><b>'+esc(c.k)+'</b>: '+esc(c.tip)+'</li>';}).join("")+'</ul>';
+    if(traps.length) html += '<ul class="missing">'+traps.map(function(c){return '<li><b>'+esc(c.k)+'</b> costs 5 points. '+esc(c.tip)+'</li>';}).join("")+'</ul>';
+    fb.innerHTML = html; fb.hidden=false;
+    if(score===max) confetti();
+  };
+  draw();
+}
+
+/* ---------- Mount games ---------- */
+document.querySelectorAll(".game[data-game]").forEach(function(el){
+  var id = el.dataset.game, g = GAMES[id];
+  el.innerHTML = '<div class="g-head"><div class="g-title"><svg class="g-icon" aria-hidden="true"><use href="#'+ICON[g.type]+'"/></svg><div><h3>'+esc(g.title)+'</h3><p>'+esc(g.blurb)+'</p></div></div><span class="g-best" data-best="'+id+'"></span></div><div class="g-body"></div>';
+  ({classify:mountClassify, higherlower:mountHL, order:mountOrder, prompt:mountPrompt})[g.type](el.querySelector(".g-body"), id, g);
+});
+
+document.getElementById("ahead").innerHTML = AHEAD.map(function(a){
+  return '<div class="stop-card"><span class="eyebrow"><span>'+esc(a.n)+'</span><span class="cone">Road works</span></span><h3>'+esc(a.t)+'</h3><p>'+esc(a.d)+'</p><p class="plan"><b>Planned game</b>'+esc(a.g)+'</p></div>';
+}).join("");
+
+document.querySelectorAll("[data-jump]").forEach(function(b){
+  b.onclick = function(){ var t=document.getElementById(b.dataset.jump); if(t) t.scrollIntoView({behavior: reduceMotion?"auto":"smooth", block:"start"}); };
+});
+
+/* ---------- The road ---------- */
+var tl = document.getElementById("tabs"), car = document.getElementById("car"), scroller = document.getElementById("roadScroll");
+tl.innerHTML = TABS.map(function(t){
+  return '<button class="stop" role="tab" id="t-'+t.id+'" aria-controls="p-'+t.id+'" aria-selected="false" tabindex="-1" data-tab="'+t.id+'">'+
+    '<span class="tok '+t.kind+'"><span>'+esc(t.code)+'</span></span><span class="lbl">'+esc(t.name)+'</span></button>';
+}).join("");
+var carX = null, current = null;
+function placeCar(id, animate){
+  var b = document.getElementById("t-"+id); if(!b) return;
+  var x = b.offsetLeft + b.offsetWidth/2 - 27;
+  if(carX!==null && x!==carX){ car.classList.toggle("flip", x<carX); }
+  if(!animate || reduceMotion){ car.style.transition="none"; car.style.transform="translateX("+x+"px)"; void car.offsetWidth; car.style.transition=""; }
+  else { car.classList.add("drive"); car.style.transform="translateX("+x+"px)"; clearTimeout(placeCar.t); placeCar.t=setTimeout(function(){car.classList.remove("drive");},720); }
+  carX = x;
+}
+function show(id, opts){
+  opts = opts || {};
+  if(!TABS.some(function(t){return t.id===id;})) id="start";
+  TABS.forEach(function(t){
+    var on = t.id===id, b=document.getElementById("t-"+t.id), p=document.getElementById("p-"+t.id);
+    b.setAttribute("aria-selected", on?"true":"false"); b.tabIndex = on?0:-1;
+    p.hidden = !on;
+    if(on && current!==null && current!==id){ p.classList.remove("enter"); void p.offsetWidth; p.classList.add("enter"); }
+  });
+  var btn = document.getElementById("t-"+id);
+  var left = btn.offsetLeft - (scroller.clientWidth - btn.offsetWidth)/2;
+  scroller.scrollTo({left:Math.max(0,left), behavior: (current===null||reduceMotion)?"auto":"smooth"});
+  if(opts.focus) btn.focus({preventScroll:true});
+  placeCar(id, current!==null);
+  current = id;
+  if(location.hash.replace("#","")!==id){ try { history.replaceState(null,"","#"+id); } catch(e){} }
+  try { localStorage.setItem(KEY+"-tab", id); } catch(e){}
+}
+tl.addEventListener("click", function(e){ var b=e.target.closest(".stop"); if(b){ show(b.dataset.tab); } });
+tl.addEventListener("keydown", function(e){
+  if(e.key!=="ArrowRight" && e.key!=="ArrowLeft") return;
+  var i = TABS.findIndex(function(t){return t.id===current;});
+  i = (i + (e.key==="ArrowRight"?1:-1) + TABS.length) % TABS.length;
+  show(TABS[i].id, {focus:true}); e.preventDefault();
+});
+document.addEventListener("click", function(e){
+  var r = e.target.closest("[data-go]");
+  if(r){ show(r.dataset.go); var top = document.querySelector("main").offsetTop - 100; if(window.scrollY>top) window.scrollTo({top:Math.max(0,top)}); }
+});
+window.addEventListener("hashchange", function(){ var h=location.hash.replace("#",""); if(h && h!==current) show(h); });
+window.addEventListener("resize", function(){ if(current) placeCar(current,false); });
+
+/* ---------- Reset ---------- */
+var reset = document.getElementById("reset"), armed=false;
+reset.onclick = function(){
+  if(!armed){ armed=true; reset.textContent="Click again to erase all scores"; setTimeout(function(){ armed=false; reset.textContent="Reset my scores"; },4000); return; }
+  best={}; save(); lastStamps={}; updateLicence(); armed=false; reset.textContent="Scores cleared";
+};
+
+var startTab = (location.hash||"").replace("#","");
+if(!startTab){ try { startTab = localStorage.getItem(KEY+"-tab") || "start"; } catch(e){ startTab="start"; } }
+updateLicence();
+show(startTab);
+if(document.fonts && document.fonts.ready){ document.fonts.ready.then(function(){ if(current) placeCar(current,false); }); }
+})();
+</script>
+</body>
+</html>
